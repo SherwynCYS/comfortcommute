@@ -66,8 +66,9 @@ function ProfilePage() {
   const initials = displayName?.slice(0, 2).toUpperCase() || "U";
 
   return (
-    <div className="space-y-6 p-4">
-      <h2 className="text-xl font-semibold">Profile</h2>
+    <MobileShell>
+      <div className="space-y-6 p-4">
+        <h2 className="text-xl font-semibold">Profile</h2>
 
       <Card>
         <CardHeader className="items-center text-center">
