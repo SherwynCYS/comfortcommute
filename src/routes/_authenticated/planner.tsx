@@ -128,9 +128,10 @@ function PlannerPage() {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Plan your journey</h2>
+    <MobileShell>
+      <div className="space-y-6 p-4">
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold">Plan your journey</h2>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
