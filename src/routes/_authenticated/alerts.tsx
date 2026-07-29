@@ -121,8 +121,9 @@ function AlertsPage() {
             </CardContent>
           </Card>
         ))
-      )}
-    </div>
+        )}
+      </div>
+    </MobileShell>
   );
 }
 
