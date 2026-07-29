@@ -1,5 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { Bus, MapPin, Bell, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -17,6 +19,37 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
+  const router = useRouter();
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      const hasSession = Boolean(data.session);
+      setIsSignedIn(hasSession);
+      if (hasSession) {
+        void router.navigate({ to: "/planner" });
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        setIsSignedIn(true);
+        void router.navigate({ to: "/planner" });
+      }
+      if (event === "SIGNED_OUT") setIsSignedIn(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b bg-card px-4 py-4">
@@ -25,8 +58,8 @@ function LandingPage() {
             <Bus className="h-6 w-6 text-primary" />
             Nebula Commute
           </div>
-          <Link to="/auth">
-            <Button variant="outline">Sign in</Button>
+          <Link to={isSignedIn ? "/planner" : "/auth"}>
+            <Button variant="outline">{isSignedIn ? "Open planner" : "Sign in"}</Button>
           </Link>
         </div>
       </header>
@@ -41,8 +74,8 @@ function LandingPage() {
             seat availability insights, and receive alerts when your favourites are affected.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link to="/auth">
-              <Button size="lg">Get started</Button>
+            <Link to={isSignedIn ? "/planner" : "/auth"}>
+              <Button size="lg">{isSignedIn ? "Open planner" : "Get started"}</Button>
             </Link>
           </div>
         </section>
