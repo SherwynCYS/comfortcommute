@@ -248,8 +248,9 @@ function PlannerPage() {
             onSave={() => handleSave(route)}
           />
         ))}
-      </section>
-    </div>
+        </section>
+      </div>
+    </MobileShell>
   );
 }
 
