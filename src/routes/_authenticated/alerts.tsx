@@ -57,8 +57,9 @@ function AlertsPage() {
   });
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
+    <MobileShell>
+      <div className="space-y-6 p-4">
+        <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Alerts</h2>
         <Button
           variant="outline"
