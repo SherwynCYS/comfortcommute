@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,43 +28,104 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (mounted && data.session) {
+        void router.navigate({ to: "/planner" });
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        void router.navigate({ to: "/planner" });
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router]);
 
   const handleEmailAuth = async (type: "signup" | "login") => {
     setLoading(true);
     setMessage(null);
+    const normalizedEmail = email.trim();
 
     try {
       if (type === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
+        const { data, error } = await supabase.auth.signUp({
+          email: normalizedEmail,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        setMessage("Check your email to confirm your account.");
+        if (data.session) {
+          router.navigate({ to: "/planner" });
+          return;
+        }
+        setMessage("Account created. You can sign in now.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
         if (error) throw error;
         router.navigate({ to: "/planner" });
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Authentication failed");
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      if (errorMessage.toLowerCase().includes("invalid login credentials")) {
+        setMessage("Invalid email or password. If you first signed in with Google, use Google or reset your password below.");
+      } else if (errorMessage.toLowerCase().includes("already registered")) {
+        setMessage("This email already has an account. Sign in, continue with Google, or reset your password below.");
+      } else {
+        setMessage(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePasswordReset = async () => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setMessage("Enter your email first, then request a password reset.");
+      return;
+    }
+
+    setResetLoading(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setMessage("If this email has an account, a password reset link has been sent.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not send password reset email");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const handleGoogle = async () => {
     setLoading(true);
+    setMessage(null);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
       setMessage(result.error.message);
       setLoading(false);
+      return;
     }
-    // If redirected, the browser is navigating away.
+    if (result.redirected) return;
+    router.navigate({ to: "/planner" });
   };
 
   return (
@@ -105,6 +166,17 @@ function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto px-0 text-xs"
+                  onClick={handlePasswordReset}
+                  disabled={loading || resetLoading}
+                >
+                  {resetLoading ? "Sending reset link…" : "Forgot password?"}
+                </Button>
               </div>
               <Button
                 className="w-full"
