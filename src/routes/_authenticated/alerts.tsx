@@ -49,7 +49,7 @@ function AlertsPage() {
 
   const sync = useMutation({
     mutationFn: useServerFn(syncAlertsFromLta),
-    onSuccess: (result) => {
+    onSuccess: (result: { inserted: number }) => {
       queryClient.invalidateQueries({ queryKey: ["alerts"] });
       toast.success(`${result.inserted} new alert(s) synced`);
     },
