@@ -65,8 +65,9 @@ function FavoritesPage() {
   });
 
   return (
-    <div className="space-y-6 p-4">
-      <h2 className="text-xl font-semibold">Your favourites</h2>
+    <MobileShell>
+      <div className="space-y-6 p-4">
+        <h2 className="text-xl font-semibold">Your favourites</h2>
 
       <Tabs defaultValue="routes" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
