@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          affected_route_or_stop: string | null
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          affected_route_or_stop?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          severity?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          affected_route_or_stop?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          severity?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorite_routes: {
+        Row: {
+          created_at: string
+          destination_lat: number | null
+          destination_lng: number | null
+          destination_name: string
+          filters: Json
+          id: string
+          name: string
+          origin_lat: number | null
+          origin_lng: number | null
+          origin_name: string
+          priority: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          destination_lat?: number | null
+          destination_lng?: number | null
+          destination_name: string
+          filters?: Json
+          id?: string
+          name: string
+          origin_lat?: number | null
+          origin_lng?: number | null
+          origin_name: string
+          priority?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          destination_lat?: number | null
+          destination_lng?: number | null
+          destination_name?: string
+          filters?: Json
+          id?: string
+          name?: string
+          origin_lat?: number | null
+          origin_lng?: number | null
+          origin_name?: string
+          priority?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorite_stops: {
+        Row: {
+          created_at: string
+          id: string
+          stop_code: string | null
+          stop_lat: number | null
+          stop_lng: number | null
+          stop_name: string
+          transport_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          stop_code?: string | null
+          stop_lat?: number | null
+          stop_lng?: number | null
+          stop_name: string
+          transport_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stop_code?: string | null
+          stop_lat?: number | null
+          stop_lng?: number | null
+          stop_name?: string
+          transport_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
