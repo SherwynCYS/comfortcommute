@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Bus, Heart, Bell, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export const Route = createFileRoute("/_authenticated")({
+export const Route = createFileRoute("/_authenticated/_layout")({
   ssr: false,
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
