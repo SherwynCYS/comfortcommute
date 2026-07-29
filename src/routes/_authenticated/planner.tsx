@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { MobileShell } from "@/components/layout/mobile-shell";
 import { planRoute, type CommuteRoute, type RouteFilters, type RoutePriority } from "@/lib/routes.functions";
 import { recommendRoute, type AiRecommendation } from "@/lib/ai.functions";
 import { createFavoriteRoute } from "@/lib/favorites.functions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,11 @@ import { Bus, Clock, Footprints, Heart, Loader2, MapPin, Sparkles, Users } from 
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/planner")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) throw redirect({ to: "/auth" });
+  },
   component: PlannerPage,
   head: () => ({
     meta: [
