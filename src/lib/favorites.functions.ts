@@ -25,18 +25,21 @@ const FavoriteStopInput = z.object({
 export const listFavoriteRoutes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return context.supabase
+    const { data, error } = await context.supabase
       .from("favorite_routes")
       .select("*")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });
 
 export const createFavoriteRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => FavoriteRouteInput.parse(input))
   .handler(async ({ data, context }) => {
-    return context.supabase
+    const { data: inserted, error } = await context.supabase
       .from("favorite_routes")
       .insert({
         user_id: context.userId,
@@ -52,34 +55,43 @@ export const createFavoriteRoute = createServerFn({ method: "POST" })
       })
       .select()
       .single();
+
+    if (error) throw new Error(error.message);
+    return inserted;
   });
 
 export const deleteFavoriteRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    return context.supabase
+    const { error } = await context.supabase
       .from("favorite_routes")
       .delete()
       .eq("id", data.id)
       .eq("user_id", context.userId);
+
+    if (error) throw new Error(error.message);
+    return { success: true };
   });
 
 export const listFavoriteStops = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return context.supabase
+    const { data, error } = await context.supabase
       .from("favorite_stops")
       .select("*")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });
 
 export const createFavoriteStop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => FavoriteStopInput.parse(input))
   .handler(async ({ data, context }) => {
-    return context.supabase
+    const { data: inserted, error } = await context.supabase
       .from("favorite_stops")
       .insert({
         user_id: context.userId,
@@ -91,15 +103,21 @@ export const createFavoriteStop = createServerFn({ method: "POST" })
       })
       .select()
       .single();
+
+    if (error) throw new Error(error.message);
+    return inserted;
   });
 
 export const deleteFavoriteStop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    return context.supabase
+    const { error } = await context.supabase
       .from("favorite_stops")
       .delete()
       .eq("id", data.id)
       .eq("user_id", context.userId);
+
+    if (error) throw new Error(error.message);
+    return { success: true };
   });
