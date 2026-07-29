@@ -143,7 +143,8 @@ function FavoritesPage() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </MobileShell>
   );
 }
 
