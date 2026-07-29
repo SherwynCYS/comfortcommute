@@ -1,8 +1,9 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getProfile, updateProfile } from "@/lib/profile.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { MobileShell } from "@/components/layout/mobile-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,11 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) throw redirect({ to: "/auth" });
+  },
   component: ProfilePage,
   head: () => ({
     meta: [
