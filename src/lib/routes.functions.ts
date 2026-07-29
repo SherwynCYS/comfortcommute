@@ -186,7 +186,7 @@ function scoreRoute(route: CommuteRoute, priority: RoutePriority, filters: Route
 }
 
 export const planRoute = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => PlanRouteInput.parse(input))
+  .validator((input: unknown) => PlanRouteInput.parse(input))
   .handler(async ({ data }) => {
     const origin = {
       name: data.originName,

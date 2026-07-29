@@ -37,7 +37,7 @@ export const listFavoriteRoutes = createServerFn({ method: "GET" })
 
 export const createFavoriteRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => FavoriteRouteInput.parse(input))
+  .validator((input: unknown) => FavoriteRouteInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: inserted, error } = await context.supabase
       .from("favorite_routes")
@@ -62,7 +62,7 @@ export const createFavoriteRoute = createServerFn({ method: "POST" })
 
 export const deleteFavoriteRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("favorite_routes")
@@ -89,7 +89,7 @@ export const listFavoriteStops = createServerFn({ method: "GET" })
 
 export const createFavoriteStop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => FavoriteStopInput.parse(input))
+  .validator((input: unknown) => FavoriteStopInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: inserted, error } = await context.supabase
       .from("favorite_stops")
@@ -110,7 +110,7 @@ export const createFavoriteStop = createServerFn({ method: "POST" })
 
 export const deleteFavoriteStop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("favorite_stops")

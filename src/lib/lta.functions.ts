@@ -20,7 +20,7 @@ async function ltaFetch(path: string, apiKey: string) {
 }
 
 export const getBusArrivals = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ busStopCode: z.string(), serviceNo: z.string().optional() }).parse(input)
   )
   .handler(async ({ data }) => {
@@ -35,7 +35,7 @@ export const getBusArrivals = createServerFn({ method: "GET" })
   });
 
 export const getBusStops = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
   .handler(async ({ data }) => {
@@ -53,7 +53,7 @@ export const getTrainServiceAlerts = createServerFn({ method: "GET" }).handler(a
 });
 
 export const getBusServices = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
   .handler(async ({ data }) => {
@@ -64,7 +64,7 @@ export const getBusServices = createServerFn({ method: "GET" })
   });
 
 export const getBusRoutes = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
   .handler(async ({ data }) => {
@@ -75,7 +75,7 @@ export const getBusRoutes = createServerFn({ method: "GET" })
   });
 
 export const getCrowdDensity = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ trainLine: z.string().optional() }).parse(input)
   )
   .handler(async ({ data }) => {

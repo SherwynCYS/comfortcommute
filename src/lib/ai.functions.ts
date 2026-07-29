@@ -19,7 +19,7 @@ export type AiRecommendation = {
 };
 
 export const recommendRoute = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => RecommendInput.parse(input))
+  .validator((input: unknown) => RecommendInput.parse(input))
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
