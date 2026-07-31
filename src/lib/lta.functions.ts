@@ -33,7 +33,7 @@ export const getBusArrivals = createServerFn({ method: "GET" })
     params.set("BusStopCode", data.busStopCode);
     if (data.serviceNo) params.set("ServiceNo", data.serviceNo);
 
-    return ltaFetch(`/BusArrivalv2?${params.toString()}`, apiKey);
+    return ltaFetch(`/v3/BusArrival?${params.toString()}`, apiKey);
   });
 
 export const getBusStops = createServerFn({ method: "GET" })

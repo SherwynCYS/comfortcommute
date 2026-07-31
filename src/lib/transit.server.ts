@@ -45,7 +45,7 @@ async function fetchServicesAtStop(
 ): Promise<Map<string, { waitMinutes: number; load: string }>> {
   const result = new Map<string, { waitMinutes: number; load: string }>();
   try {
-    const response = await fetch(`${LTA_BASE_URL}/BusArrivalv2?BusStopCode=${code}`, {
+    const response = await fetch(`${LTA_BASE_URL}/v3/BusArrival?BusStopCode=${code}`, {
       headers: { AccountKey: apiKey, Accept: "application/json" },
     });
     if (!response.ok) return result;
