@@ -36,21 +36,9 @@ export const Route = createFileRoute("/_authenticated/planner")({
   }),
 });
 
-const sampleOrigins = [
-  { name: "Jurong East", lat: 1.3332, lng: 103.7418 },
-  { name: "Tampines", lat: 1.3525, lng: 103.9447 },
-  { name: "Orchard", lat: 1.3048, lng: 103.8318 },
-];
-
-const sampleDestinations = [
-  { name: "Raffles Place", lat: 1.2839, lng: 103.8525 },
-  { name: "Dhoby Ghaut", lat: 1.2991, lng: 103.8458 },
-  { name: "Buona Vista", lat: 1.3074, lng: 103.7908 },
-];
-
 function PlannerPage() {
-  const [origin, setOrigin] = useState(sampleOrigins[0]);
-  const [destination, setDestination] = useState(sampleDestinations[0]);
+  const [origin, setOrigin] = useState<PlaceResult | null>(null);
+  const [destination, setDestination] = useState<PlaceResult | null>(null);
   const [priority, setPriority] = useState<RoutePriority>("balanced");
   const [filters, setFilters] = useState<RouteFilters>({
     seatAvailability: false,
@@ -62,6 +50,7 @@ function PlannerPage() {
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
   const [recommendation, setRecommendation] = useState<AiRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
+
 
   const planFn = useServerFn(planRoute);
   const recommendFn = useServerFn(recommendRoute);
