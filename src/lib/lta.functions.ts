@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const LTA_BASE_URL = "http://datamall2.mytransport.sg/ltaodataservice";
@@ -20,6 +21,7 @@ async function ltaFetch(path: string, apiKey: string) {
 }
 
 export const getBusArrivals = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
     z.object({ busStopCode: z.string(), serviceNo: z.string().optional() }).parse(input)
   )
@@ -35,6 +37,7 @@ export const getBusArrivals = createServerFn({ method: "GET" })
   });
 
 export const getBusStops = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
@@ -45,7 +48,8 @@ export const getBusStops = createServerFn({ method: "GET" })
     return ltaFetch(`/BusStops?$skip=${data.skip}`, apiKey);
   });
 
-export const getTrainServiceAlerts = createServerFn({ method: "GET" }).handler(async () => {
+export const getTrainServiceAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth]).handler(async () => {
   const apiKey = process.env.LTA_DATAMALL_API_KEY;
   if (!apiKey) throw new Error("Missing LTA_DATAMALL_API_KEY");
 
@@ -53,6 +57,7 @@ export const getTrainServiceAlerts = createServerFn({ method: "GET" }).handler(a
 });
 
 export const getBusServices = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
@@ -64,6 +69,7 @@ export const getBusServices = createServerFn({ method: "GET" })
   });
 
 export const getBusRoutes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
     z.object({ skip: z.number().int().min(0).default(0) }).parse(input)
   )
@@ -75,6 +81,7 @@ export const getBusRoutes = createServerFn({ method: "GET" })
   });
 
 export const getCrowdDensity = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
     z.object({ trainLine: z.string().optional() }).parse(input)
   )
