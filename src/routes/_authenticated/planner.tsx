@@ -66,8 +66,13 @@ function PlannerPage() {
   });
 
   const handlePlan = async () => {
+    if (!origin || !destination) {
+      toast.error("Pick both a start and a destination");
+      return;
+    }
     setLoading(true);
     try {
+
       const candidates = await planFn({
         data: {
           originName: origin.name,
