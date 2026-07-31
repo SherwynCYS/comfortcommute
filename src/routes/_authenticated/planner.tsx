@@ -123,44 +123,10 @@ function PlannerPage() {
           <h2 className="text-xl font-semibold">Plan your journey</h2>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="origin">From</Label>
-            <select
-              id="origin"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={origin.name}
-              onChange={(e) => {
-                const found = sampleOrigins.find((o) => o.name === e.target.value);
-                if (found) setOrigin(found);
-              }}
-            >
-              {sampleOrigins.map((o) => (
-                <option key={o.name} value={o.name}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="destination">To</Label>
-            <select
-              id="destination"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={destination.name}
-              onChange={(e) => {
-                const found = sampleDestinations.find((d) => d.name === e.target.value);
-                if (found) setDestination(found);
-              }}
-            >
-              {sampleDestinations.map((d) => (
-                <option key={d.name} value={d.name}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
+          <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
         </div>
+
 
         <div className="space-y-2">
           <Label>Priority</Label>
