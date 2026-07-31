@@ -118,14 +118,23 @@ async function computeTransitRoutes(
   return json.routes ?? [];
 }
 
-function toCommuteRoute(route: GRoute, index: number, origin: Point, destination: Point): CommuteRoute | null {
+export type BusBoarding = { serviceNo: string; lat: number; lng: number };
+
+function toCommuteRoute(
+  route: GRoute,
+  index: number,
+  origin: Point,
+  destination: Point
+): { route: CommuteRoute; boardings: BusBoarding[] } | null {
   const gsteps = (route.legs ?? []).flatMap((leg) => leg.steps ?? []);
   if (gsteps.length === 0) return null;
 
   const steps: RouteStep[] = [];
+  const boardings: BusBoarding[] = [];
   let walkMeters = 0;
   let rideMeters = 0;
   let transitCount = 0;
+
 
   for (const step of gsteps) {
     const durationMinutes = Math.max(1, minutes(step.staticDuration));
