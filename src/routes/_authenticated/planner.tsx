@@ -7,6 +7,9 @@ import { MobileShell } from "@/components/layout/mobile-shell";
 import { planRoute, type CommuteRoute, type RouteFilters, type RoutePriority } from "@/lib/routes.functions";
 import { recommendRoute, type AiRecommendation } from "@/lib/ai.functions";
 import { createFavoriteRoute } from "@/lib/favorites.functions";
+import { PlaceSearch } from "@/components/planner/place-search";
+import type { PlaceResult } from "@/lib/places.functions";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
