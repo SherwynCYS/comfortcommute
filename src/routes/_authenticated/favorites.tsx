@@ -37,15 +37,17 @@ export const Route = createFileRoute("/_authenticated/favorites")({
 
 function FavoritesPage() {
   const queryClient = useQueryClient();
+  const listRoutesFn = useServerFn(listFavoriteRoutes);
+  const listStopsFn = useServerFn(listFavoriteStops);
 
   const { data: routes = [] } = useQuery({
     queryKey: ["favorite-routes"],
-    queryFn: () => useServerFn(listFavoriteRoutes)({ data: undefined }),
+    queryFn: () => listRoutesFn({ data: undefined }),
   });
 
   const { data: stops = [] } = useQuery({
     queryKey: ["favorite-stops"],
-    queryFn: () => useServerFn(listFavoriteStops)({ data: undefined }),
+    queryFn: () => listStopsFn({ data: undefined }),
   });
 
   const deleteRoute = useMutation({
