@@ -2,24 +2,11 @@ import type { CommuteRoute, RouteStep } from "./route-types";
 import { getBusStopPlaces, railPlaces, type Place } from "./places.server";
 
 const LTA_BASE_URL = "https://datamall2.mytransport.sg/ltaodataservice";
-const CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 const WALK_SPEED_M_PER_MIN = 80;
 const MAX_WALK_METERS = 800;
 
 export type Point = { name: string; lat: number; lng: number };
 
-type LtaBusRoute = {
-  ServiceNo: string;
-  Operator: string;
-  Direction: number;
-  StopSequence: number;
-  BusStopCode: string;
-  Distance: number;
-};
-
-type RouteStop = { code: string; seq: number; distanceKm: number };
-
-let busRouteCache: { index: Map<string, RouteStop[]>; fetchedAt: number } | null = null;
 
 export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371e3;
@@ -31,43 +18,6 @@ export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-async function fetchBusRouteIndex(apiKey: string): Promise<Map<string, RouteStop[]>> {
-  const index = new Map<string, RouteStop[]>();
-
-  for (let skip = 0; skip < 30000; skip += 500) {
-    const response = await fetch(`${LTA_BASE_URL}/BusRoutes?$skip=${skip}`, {
-      headers: { AccountKey: apiKey, Accept: "application/json" },
-    });
-    if (!response.ok) break;
-
-    const json = (await response.json()) as { value?: LtaBusRoute[] };
-    const value = json.value ?? [];
-    if (value.length === 0) break;
-
-    for (const row of value) {
-      const key = `${row.ServiceNo}|${row.Direction}`;
-      const list = index.get(key) ?? [];
-      list.push({ code: row.BusStopCode, seq: row.StopSequence, distanceKm: row.Distance ?? 0 });
-      index.set(key, list);
-    }
-
-    if (value.length < 500) break;
-  }
-
-  for (const list of index.values()) list.sort((a, b) => a.seq - b.seq);
-  return index;
-}
-
-async function getBusRouteIndex(apiKey: string): Promise<Map<string, RouteStop[]>> {
-  if (busRouteCache && Date.now() - busRouteCache.fetchedAt < CACHE_TTL_MS) return busRouteCache.index;
-  try {
-    const index = await fetchBusRouteIndex(apiKey);
-    if (index.size > 0) busRouteCache = { index, fetchedAt: Date.now() };
-    return index;
-  } catch {
-    return busRouteCache?.index ?? new Map();
-  }
-}
 
 function nearest(places: Place[], point: Point, count: number, maxMeters = MAX_WALK_METERS) {
   return places
