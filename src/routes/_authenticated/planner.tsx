@@ -109,7 +109,9 @@ function PlannerPage() {
   };
 
   const handleSave = (route: CommuteRoute) => {
+    if (!origin || !destination) return;
     saveMutation.mutate({
+
       data: {
         name: `${origin.name} → ${destination.name}`,
         originName: origin.name,
