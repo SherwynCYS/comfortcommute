@@ -286,7 +286,15 @@ function PlannerPage() {
         </Card>
       )}
 
+      {routes.length > 0 && !routes.some((r) => r.steps.some((s) => s.mode === "bus")) && (
+        <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+          No bus options for this trip right now — live bus data is unavailable, so only train and
+          walking routes are shown.
+        </p>
+      )}
+
       <section className="space-y-4">
+
         {routes.map((route) => (
           <RouteCard
             key={route.id}
