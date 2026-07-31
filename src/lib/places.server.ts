@@ -1,12 +1,14 @@
 import { RAIL_STATIONS } from "@/data/mrt-stations";
 
+export type PlaceType = "rail" | "bus" | "address";
+
 export type Place = {
   id: string;
   name: string;
   description: string;
   lat: number;
   lng: number;
-  type: "rail" | "bus";
+  type: PlaceType;
 };
 
 type LtaBusStop = {
@@ -76,6 +78,92 @@ export const railPlaces: Place[] = RAIL_STATIONS.map((station) => ({
   lng: station.lng,
   type: "rail" as const,
 }));
+
+/* ---------------- Address / place geocoding (Google-Maps style search) ---------------- */
+
+type PhotonFeature = {
+  geometry: { coordinates: [number, number] };
+  properties: {
+    osm_id?: number | string;
+    name?: string;
+    street?: string;
+    housenumber?: string;
+    postcode?: string;
+    district?: string;
+    city?: string;
+    county?: string;
+    state?: string;
+    country?: string;
+    countrycode?: string;
+    type?: string;
+  };
+};
+
+// Singapore bounding box, so results stay local like a transit app should.
+const SG_BBOX = { minLng: 103.6, minLat: 1.2, maxLng: 104.1, maxLat: 1.48 };
+
+function inSingapore(lat: number, lng: number) {
+  return (
+    lat >= SG_BBOX.minLat && lat <= SG_BBOX.maxLat && lng >= SG_BBOX.minLng && lng <= SG_BBOX.maxLng
+  );
+}
+
+function describeFeature(p: PhotonFeature["properties"]): string {
+  const parts = [
+    [p.housenumber, p.street].filter(Boolean).join(" "),
+    p.district,
+    p.city,
+    p.postcode ? `Singapore ${p.postcode}` : p.country,
+  ].filter((v): v is string => Boolean(v && v.trim()));
+
+  return Array.from(new Set(parts)).join(", ");
+}
+
+export async function searchAddresses(query: string, limit: number): Promise<Place[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  const params = new URLSearchParams({
+    q,
+    limit: String(Math.min(limit, 15)),
+    lang: "en",
+    lat: "1.3521",
+    lon: "103.8198",
+    bbox: `${SG_BBOX.minLng},${SG_BBOX.minLat},${SG_BBOX.maxLng},${SG_BBOX.maxLat}`,
+  });
+
+  try {
+    const response = await fetch(`https://photon.komoot.io/api/?${params.toString()}`, {
+      headers: { Accept: "application/json", "User-Agent": "ComfortCommute/1.0" },
+    });
+    if (!response.ok) return [];
+
+    const json = (await response.json()) as { features?: PhotonFeature[] };
+
+    return (json.features ?? [])
+      .map((feature): Place | null => {
+        const [lng, lat] = feature.geometry?.coordinates ?? [];
+        const props = feature.properties ?? {};
+        if (typeof lat !== "number" || typeof lng !== "number") return null;
+        if (!inSingapore(lat, lng)) return null;
+
+        const name = props.name ?? [props.housenumber, props.street].filter(Boolean).join(" ");
+        if (!name) return null;
+
+        return {
+          id: `addr-${props.osm_id ?? `${lat},${lng}`}`,
+          name,
+          description: describeFeature(props) || "Singapore",
+          lat,
+          lng,
+          type: "address",
+        };
+      })
+      .filter((p): p is Place => p !== null);
+  } catch {
+    return [];
+  }
+}
 
 function scoreMatch(place: Place, query: string): number {
   const haystack = `${place.name} ${place.description}`.toLowerCase();

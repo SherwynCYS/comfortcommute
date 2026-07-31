@@ -8,7 +8,7 @@ export type PlaceResult = {
   description: string;
   lat: number;
   lng: number;
-  type: "rail" | "bus";
+  type: "rail" | "bus" | "address";
 };
 
 export const searchPlaces = createServerFn({ method: "GET" })
@@ -17,10 +17,18 @@ export const searchPlaces = createServerFn({ method: "GET" })
     z.object({ query: z.string().default(""), limit: z.number().int().min(1).max(50).default(15) }).parse(input)
   )
   .handler(async ({ data }): Promise<PlaceResult[]> => {
-    const { railPlaces, getBusStopPlaces, searchPlaceList } = await import("./places.server");
+    const { railPlaces, getBusStopPlaces, searchPlaceList, searchAddresses } = await import("./places.server");
 
     const apiKey = process.env.LTA_DATAMALL_API_KEY;
-    const busStops = apiKey ? await getBusStopPlaces(apiKey) : [];
+    const [busStops, addresses] = await Promise.all([
+      apiKey ? getBusStopPlaces(apiKey) : Promise.resolve([]),
+      searchAddresses(data.query, 8),
+    ]);
 
-    return searchPlaceList([...railPlaces, ...busStops], data.query, data.limit);
+    const transit = searchPlaceList([...railPlaces, ...busStops], data.query, data.limit);
+
+    // Addresses/places first (Google Maps style), then matching stations and stops.
+    const merged = [...addresses, ...transit];
+    const seen = new Set<string>();
+    return merged.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))).slice(0, data.limit);
   });
