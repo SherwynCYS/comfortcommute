@@ -1,7 +1,7 @@
 import type { CommuteRoute, RouteStep } from "./route-types";
 import { getBusStopPlaces, railPlaces, type Place } from "./places.server";
 
-const LTA_BASE_URL = "http://datamall2.mytransport.sg/ltaodataservice";
+const LTA_BASE_URL = "https://datamall2.mytransport.sg/ltaodataservice";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 const WALK_SPEED_M_PER_MIN = 80;
 const MAX_WALK_METERS = 800;
