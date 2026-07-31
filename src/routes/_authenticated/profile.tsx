@@ -36,10 +36,12 @@ function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState("");
+  const getProfileFn = useServerFn(getProfile);
+  const updateProfileFn = useServerFn(updateProfile);
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
-    queryFn: () => useServerFn(getProfile)({ data: undefined }),
+    queryFn: () => getProfileFn({ data: undefined }),
   });
 
   useEffect(() => {
@@ -49,11 +51,13 @@ function ProfilePage() {
   }, [profile]);
 
   const update = useMutation({
-    mutationFn: useServerFn(updateProfile),
+    mutationFn: updateProfileFn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated");
     },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not save profile"),
   });
 
   const handleSignOut = async () => {
