@@ -8,9 +8,9 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => ({
     meta: [
-      { title: "Nebula Commute | Smarter Singapore Public Transport" },
+      { title: "ComfortCommute | AltF4" },
       { name: "description", content: "Plan faster, more comfortable commutes with AI-powered route recommendations and real-time alerts." },
-      { property: "og:title", content: "Nebula Commute | Smarter Singapore Public Transport" },
+      { property: "og:title", content: "ComfortCommute | AltF4" },
       { property: "og:description", content: "Plan faster, more comfortable commutes with AI-powered route recommendations and real-time alerts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
