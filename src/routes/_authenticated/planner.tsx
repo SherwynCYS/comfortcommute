@@ -309,6 +309,13 @@ function PlannerPage() {
   );
 }
 
+function formatTime(iso: string) {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime())
+    ? ""
+    : date.toLocaleTimeString("en-SG", { hour: "numeric", minute: "2-digit" });
+}
+
 function RouteCard({
   route,
   recommended,
@@ -324,11 +331,16 @@ function RouteCard({
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-base">{route.summary}</CardTitle>
-            <p className="text-xs text-muted-foreground">Score: {route.score}</p>
+            <p className="text-xs text-muted-foreground">
+              {route.departureTime
+                ? `Depart ${formatTime(route.departureTime)}${route.arrivalTime ? ` · arrive ${formatTime(route.arrivalTime)}` : ""}`
+                : `Score: ${route.score}`}
+            </p>
           </div>
           {recommended && <Badge variant="default">Recommended</Badge>}
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-1">

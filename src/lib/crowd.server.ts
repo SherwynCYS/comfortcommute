@@ -107,7 +107,9 @@ export async function enrichWithLiveCrowd(
       steps,
       crowdLevel: worst === "LSD" ? "high" : worst === "SDA" ? "medium" : "low",
       seatAvailability: worst === "SEA" ? "likely" : worst === "LSD" ? "unlikely" : "unknown",
-      totalTimeMinutes: entry.route.totalTimeMinutes + Math.min(waitMinutes, 10),
+      // Google's real-time departure already includes waiting; only surface an
+      // extra penalty when the live wait is far worse than a normal headway.
+      totalTimeMinutes: entry.route.totalTimeMinutes + Math.max(0, Math.min(waitMinutes - 8, 7)),
     } satisfies CommuteRoute;
   });
 }

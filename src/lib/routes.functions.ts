@@ -28,7 +28,7 @@ export const planRoute = createServerFn({ method: "POST" })
   .validator((input: unknown) => PlanRouteInput.parse(input))
   .handler(async ({ data }) => {
     const { buildCandidateRoutes } = await import("./transit.server");
-    const { scoreRoute } = await import("./scoring.server");
+    const { rankRoutes } = await import("./scoring.server");
     const { estimateFareCents } = await import("./fares");
 
     const candidates = await buildCandidateRoutes(
@@ -36,16 +36,26 @@ export const planRoute = createServerFn({ method: "POST" })
       { name: data.destinationName, lat: data.destinationLat, lng: data.destinationLng }
     );
 
-    return candidates
-      .map((route) => {
-        const boardings = route.steps.filter((step) => step.mode !== "walk").length;
-        const fareCents = estimateFareCents({
-          distanceKm: route.rideDistanceKm,
-          cardType: data.cardType,
-          boardings,
-        });
-        const withFare = { ...route, fareCents };
-        return { ...withFare, score: scoreRoute(withFare, data.priority, data.filters) };
-      })
-      .sort((a, b) => b.score - a.score);
+    const priced = candidates.map((route) => {
+      const boardings = route.steps.filter((step) => step.mode !== "walk").length;
+      const estimated = estimateFareCents({
+        distanceKm: route.rideDistanceKm,
+        cardType: data.cardType,
+        boardings,
+      });
+      // Prefer the operator fare reported by the routing provider (adult), scaled
+      // to the traveller's card using our own adult-vs-card ratio.
+      const provider = route.providerFareCents;
+      const adult = estimateFareCents({
+        distanceKm: route.rideDistanceKm,
+        cardType: "adult_card",
+        boardings,
+      });
+      const fareCents =
+        provider && adult > 0 ? Math.round(provider * (estimated / adult)) : estimated;
+      return { ...route, fareCents };
+    });
+
+    return rankRoutes(priced, data.priority, data.filters);
   });
+
