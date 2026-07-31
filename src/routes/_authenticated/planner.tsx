@@ -71,17 +71,17 @@ function PlannerPage() {
   const savedPlace = (kind: "home" | "work"): PlaceResult | null => {
     const name = kind === "home" ? profile?.home_name : profile?.work_name;
     const lat = kind === "home" ? profile?.home_lat : profile?.work_lat;
-    const lng = kind === "home" ? profile?.work_lng ?? profile?.work_lng : profile?.work_lng;
-    const realLng = kind === "home" ? profile?.home_lng : profile?.work_lng;
-    if (!name || lat == null || realLng == null) return null;
+    const lng = kind === "home" ? profile?.home_lng : profile?.work_lng;
+    if (!name || lat == null || lng == null) return null;
     return {
       id: kind,
       name,
       description: kind === "home" ? "Saved home" : "Saved work",
       lat,
-      lng: realLng,
+      lng,
       type: "address",
     };
+
   };
 
   const homePlace = savedPlace("home");
