@@ -309,6 +309,13 @@ function PlannerPage() {
   );
 }
 
+function formatTime(iso: string) {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime())
+    ? ""
+    : date.toLocaleTimeString("en-SG", { hour: "numeric", minute: "2-digit" });
+}
+
 function RouteCard({
   route,
   recommended,
