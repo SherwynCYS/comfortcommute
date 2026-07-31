@@ -265,11 +265,21 @@ function RouteCard({
           {route.steps.map((step, idx) => (
             <div key={idx} className="flex gap-3 text-sm">
               <div className="mt-1">
-                {step.mode === "walk" ? <Footprints className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+                {step.mode === "walk" ? (
+                  <Footprints className="h-4 w-4" />
+                ) : step.mode === "bus" ? (
+                  <Bus className="h-4 w-4" />
+                ) : (
+                  <MapPin className="h-4 w-4" />
+                )}
               </div>
               <div>
                 <p className="font-medium">
-                  {step.mode === "walk" ? "Walk" : step.serviceNo ?? step.line ?? "Ride"} · {step.durationMinutes} min
+                  {step.mode === "walk"
+                    ? "Walk"
+                    : step.mode === "bus"
+                      ? `Bus ${step.serviceNo ?? ""}`.trim()
+                      : (step.line ?? "Train")} · {step.durationMinutes} min
                 </p>
                 <p className="text-muted-foreground">{step.instruction}</p>
               </div>

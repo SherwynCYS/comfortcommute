@@ -53,7 +53,7 @@ export function PlaceSearch({ id, label, value, onChange, placeholder }: Props) 
           id={id}
           autoComplete="off"
           value={open ? query : (value?.name ?? "")}
-          placeholder={placeholder ?? "Search MRT, LRT or bus stop"}
+          placeholder={placeholder ?? "Search a place, address, MRT or bus stop"}
           onFocus={() => {
             setOpen(true);
             setQuery("");
@@ -77,7 +77,7 @@ export function PlaceSearch({ id, label, value, onChange, placeholder }: Props) 
         {open && (
           <div className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
             {results.length === 0 && !isFetching && (
-              <p className="px-3 py-2 text-sm text-muted-foreground">No matching stops or stations</p>
+              <p className="px-3 py-2 text-sm text-muted-foreground">No matching places</p>
             )}
             {results.map((place) => (
               <button
