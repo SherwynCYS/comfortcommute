@@ -11,10 +11,10 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Reset password | Nebula Commute" },
-      { name: "description", content: "Set a new password for your Nebula Commute account." },
-      { property: "og:title", content: "Reset password | Nebula Commute" },
-      { property: "og:description", content: "Set a new password for your Nebula Commute account." },
+      { title: "Reset password | ComfortCommute" },
+      { name: "description", content: "Set a new password for your ComfortCommute account." },
+      { property: "og:title", content: "Reset password | ComfortCommute" },
+      { property: "og:description", content: "Set a new password for your ComfortCommute account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -74,7 +74,7 @@ function ResetPasswordPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="mb-8 flex items-center gap-2 text-2xl font-bold text-foreground">
         <Bus className="h-8 w-8 text-primary" />
-        Nebula Commute
+        ComfortCommute
       </div>
 
       <Card className="w-full max-w-md">

@@ -13,10 +13,10 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({
     meta: [
-      { title: "Sign in | Nebula Commute" },
-      { name: "description", content: "Sign in to Nebula Commute to plan your public transport journeys." },
-      { property: "og:title", content: "Sign in | Nebula Commute" },
-      { property: "og:description", content: "Sign in to Nebula Commute to plan your public transport journeys." },
+      { title: "Sign in | ComfortCommute" },
+      { name: "description", content: "Sign in to ComfortCommute to plan your public transport journeys." },
+      { property: "og:title", content: "Sign in | ComfortCommute" },
+      { property: "og:description", content: "Sign in to ComfortCommute to plan your public transport journeys." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -132,7 +132,7 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <Link to="/" className="mb-8 flex items-center gap-2 text-2xl font-bold text-foreground">
         <Bus className="h-8 w-8 text-primary" />
-        Nebula Commute
+        ComfortCommute
       </Link>
 
       <Card className="w-full max-w-md">

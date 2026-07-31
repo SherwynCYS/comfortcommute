@@ -19,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/alerts")({
   component: AlertsPage,
   head: () => ({
     meta: [
-      { title: "Alerts | Nebula Commute" },
+      { title: "Alerts | ComfortCommute" },
       { name: "description", content: "Incident and crowd alerts for your favourite routes." },
-      { property: "og:title", content: "Alerts | Nebula Commute" },
+      { property: "og:title", content: "Alerts | ComfortCommute" },
       { property: "og:description", content: "Incident and crowd alerts for your favourite routes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

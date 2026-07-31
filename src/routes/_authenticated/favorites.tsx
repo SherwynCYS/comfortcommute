@@ -25,9 +25,9 @@ export const Route = createFileRoute("/_authenticated/favorites")({
   component: FavoritesPage,
   head: () => ({
     meta: [
-      { title: "Favourites | Nebula Commute" },
+      { title: "Favourites | ComfortCommute" },
       { name: "description", content: "Manage your saved routes and stops." },
-      { property: "og:title", content: "Favourites | Nebula Commute" },
+      { property: "og:title", content: "Favourites | ComfortCommute" },
       { property: "og:description", content: "Manage your saved routes and stops." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

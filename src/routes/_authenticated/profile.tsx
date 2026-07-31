@@ -22,10 +22,10 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
   head: () => ({
     meta: [
-      { title: "Profile | Nebula Commute" },
-      { name: "description", content: "Manage your Nebula Commute profile." },
-      { property: "og:title", content: "Profile | Nebula Commute" },
-      { property: "og:description", content: "Manage your Nebula Commute profile." },
+      { title: "Profile | ComfortCommute" },
+      { name: "description", content: "Manage your ComfortCommute profile." },
+      { property: "og:title", content: "Profile | ComfortCommute" },
+      { property: "og:description", content: "Manage your ComfortCommute profile." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

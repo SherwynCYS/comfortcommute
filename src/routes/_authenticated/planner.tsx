@@ -26,9 +26,9 @@ export const Route = createFileRoute("/_authenticated/planner")({
   component: PlannerPage,
   head: () => ({
     meta: [
-      { title: "Plan Journey | Nebula Commute" },
+      { title: "Plan Journey | ComfortCommute" },
       { name: "description", content: "Plan your commute with AI-powered recommendations." },
-      { property: "og:title", content: "Plan Journey | Nebula Commute" },
+      { property: "og:title", content: "Plan Journey | ComfortCommute" },
       { property: "og:description", content: "Plan your commute with AI-powered recommendations." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
