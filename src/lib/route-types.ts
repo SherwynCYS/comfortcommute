@@ -33,4 +33,12 @@ export type CommuteRoute = {
   rideDistanceKm: number;
   /** Estimated fare in cents for the traveller's fare card. */
   fareCents: number;
+  /** ISO departure time of the first transit leg, when the provider gives one. */
+  departureTime?: string;
+  /** ISO arrival time at the destination, when the provider gives one. */
+  arrivalTime?: string;
+  /** Adult fare in cents reported by the routing provider, if available. */
+  providerFareCents?: number;
+  /** Position in the routing provider's own ordering (0 = its top suggestion). */
+  baselineRank?: number;
 };
