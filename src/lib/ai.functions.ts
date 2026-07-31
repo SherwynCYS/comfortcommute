@@ -8,7 +8,7 @@ import type { CommuteRoute, RoutePriority, RouteFilters } from "./routes.functio
 const RecommendInput = z.object({
   originName: z.string(),
   destinationName: z.string(),
-  priority: z.enum(["comfort", "time", "balanced"]),
+  priority: z.enum(["comfort", "time", "balanced", "price"]),
   filters: z.record(z.boolean()).default({}),
   routes: z.array(z.any()),
 });
@@ -38,11 +38,13 @@ export const recommendRoute = createServerFn({ method: "POST" })
 
     const prompt = `
 You are a Singapore public transport commute assistant. The user wants to travel from "${data.originName}" to "${data.destinationName}".
-Their priority is: ${data.priority} (comfort = prefer less crowded, more seats; time = fastest; balanced = reasonable mix).
+Their priority is: ${data.priority} (comfort = prefer less crowded, more seats; time = fastest; balanced = reasonable mix; price = cheapest fare).
 Active filters: ${filterLabels}.
 
 Here are candidate routes (JSON):
 ${JSON.stringify(data.routes, null, 2)}
+
+Each route includes an estimated fare in cents (fareCents) for the traveller's concession card — weigh cost when the priority is price or when fares differ noticeably.
 
 Recommend the single best route for this user. Return the route id, a concise 1-2 sentence explanation, and the route ids ranked from best to worst.
 `;
