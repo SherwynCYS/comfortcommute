@@ -208,17 +208,22 @@ function toCommuteRoute(
   );
 
   return {
-    id: `g-${index}-${summaryParts.join("-") || "walk"}`,
-    summary: summaryParts.length ? `${summaryParts.join(" → ")}` : `Walk · ${origin.name} to ${destination.name}`,
-    totalTimeMinutes: Math.max(1, minutes(route.duration)),
-    walkingDistanceMeters: Math.round(walkMeters),
-    transfers: Math.max(0, transitCount - 1),
-    crowdLevel: "medium",
-    seatAvailability: "unknown",
-    rideDistanceKm: rideMeters / 1000,
-    fareCents: 0,
-    steps: merged,
-    score: 0,
+    route: {
+      id: `g-${index}-${summaryParts.join("-") || "walk"}`,
+      summary: summaryParts.length
+        ? summaryParts.join(" → ")
+        : `Walk · ${origin.name} to ${destination.name}`,
+      totalTimeMinutes: Math.max(1, minutes(route.duration)),
+      walkingDistanceMeters: Math.round(walkMeters),
+      transfers: Math.max(0, transitCount - 1),
+      crowdLevel: "medium",
+      seatAvailability: "unknown",
+      rideDistanceKm: rideMeters / 1000,
+      fareCents: 0,
+      steps: merged,
+      score: 0,
+    },
+    boardings,
   };
 }
 
@@ -242,16 +247,20 @@ export async function buildGoogleTransitRoutes(
     ),
   ]);
 
-  const routes = [...balanced, ...lessWalking, ...fewerTransfers]
+  const built = [...balanced, ...lessWalking, ...fewerTransfers]
     .map((route, index) => toCommuteRoute(route, index, origin, destination))
-    .filter((route): route is CommuteRoute => route !== null);
+    .filter((entry): entry is { route: CommuteRoute; boardings: BusBoarding[] } => entry !== null);
 
-  // De-duplicate itineraries that use the same services in the same order.
+  // De-duplicate itineraries that use the same services for the same duration.
   const seen = new Set<string>();
-  return routes.filter((route) => {
+  const unique = built.filter(({ route }) => {
     const key = `${route.summary}|${route.totalTimeMinutes}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+
+  const { enrichWithLiveCrowd } = await import("./crowd.server");
+  return enrichWithLiveCrowd(unique);
 }
+
