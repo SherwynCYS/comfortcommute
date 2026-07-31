@@ -10,7 +10,7 @@ const FavoriteRouteInput = z.object({
   destinationName: z.string().min(1),
   destinationLat: z.number().optional(),
   destinationLng: z.number().optional(),
-  priority: z.enum(["comfort", "time", "balanced"]).default("balanced"),
+  priority: z.enum(["comfort", "time", "balanced", "price"]).default("balanced"),
   filters: z.record(z.boolean()).default({}),
 });
 

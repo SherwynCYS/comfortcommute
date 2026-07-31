@@ -164,6 +164,8 @@ async function buildBusRoutes(origin: Point, destination: Point, apiKey: string)
       transfers: 0,
       crowdLevel: opt.stopsCount > 20 ? "high" : "medium",
       seatAvailability: opt.stopsCount <= 12 ? "likely" : "unknown",
+      rideDistanceKm: opt.rideKm,
+      fareCents: 0,
       steps: [
         walkStep(origin.name, `${boardName} bus stop`, opt.board.meters),
         {
@@ -203,6 +205,8 @@ function buildRailRoute(origin: Point, destination: Point): CommuteRoute | null 
     transfers: railMeters > 8000 ? 1 : 0,
     crowdLevel: "medium",
     seatAvailability: "unknown",
+    rideDistanceKm: railMeters / 1000,
+    fareCents: 0,
     steps: [
       walkStep(origin.name, board.place.name, board.meters),
       {
@@ -251,6 +255,8 @@ async function buildBusRailRoute(
     transfers: 1,
     crowdLevel: "low",
     seatAvailability: "likely",
+    rideDistanceKm: feeder.rideDistanceKm + rail.rideDistanceKm,
+    fareCents: 0,
     steps,
     score: 0,
   };
@@ -266,6 +272,8 @@ function walkOnlyRoute(origin: Point, destination: Point): CommuteRoute {
     transfers: 0,
     crowdLevel: "low",
     seatAvailability: "likely",
+    rideDistanceKm: 0,
+    fareCents: 0,
     steps: [walkStep(origin.name, destination.name, meters)],
     score: 0,
   };

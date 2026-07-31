@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/layout/mobile-shell";
 import { planRoute, type CommuteRoute, type RouteFilters, type RoutePriority } from "@/lib/routes.functions";
@@ -9,6 +9,8 @@ import { recommendRoute, type AiRecommendation } from "@/lib/ai.functions";
 import { createFavoriteRoute } from "@/lib/favorites.functions";
 import { PlaceSearch } from "@/components/planner/place-search";
 import type { PlaceResult } from "@/lib/places.functions";
+import { getProfile } from "@/lib/profile.functions";
+import { formatFare, cardLabel, type CardType } from "@/lib/fares";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Bus, Clock, Footprints, Heart, Loader2, MapPin, Sparkles, Users } from "lucide-react";
+import { Briefcase, Bus, Clock, Coins, Footprints, Heart, Home, Loader2, MapPin, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/planner")({
@@ -49,6 +51,7 @@ function PlannerPage() {
     lessWalking: false,
     airConditioned: false,
     accessible: false,
+    cheaperFare: false,
   });
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
   const [recommendation, setRecommendation] = useState<AiRecommendation | null>(null);
@@ -56,6 +59,33 @@ function PlannerPage() {
 
 
   const planFn = useServerFn(planRoute);
+  const getProfileFn = useServerFn(getProfile);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => getProfileFn({ data: undefined }),
+  });
+
+  const cardType = (profile?.card_type as CardType | undefined) ?? "adult_card";
+
+  const savedPlace = (kind: "home" | "work"): PlaceResult | null => {
+    const name = kind === "home" ? profile?.home_name : profile?.work_name;
+    const lat = kind === "home" ? profile?.home_lat : profile?.work_lat;
+    const lng = kind === "home" ? profile?.home_lng : profile?.work_lng;
+    if (!name || lat == null || lng == null) return null;
+    return {
+      id: kind,
+      name,
+      description: kind === "home" ? "Saved home" : "Saved work",
+      lat,
+      lng,
+      type: "address",
+    };
+
+  };
+
+  const homePlace = savedPlace("home");
+  const workPlace = savedPlace("work");
   const recommendFn = useServerFn(recommendRoute);
   const saveRouteFn = useServerFn(createFavoriteRoute);
 
@@ -83,6 +113,7 @@ function PlannerPage() {
           destinationLng: destination.lng,
           priority,
           filters,
+          cardType,
         },
       });
       setRoutes(candidates);
@@ -132,6 +163,49 @@ function PlannerPage() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Plan your journey</h2>
 
+        {(homePlace || workPlace) && (
+          <div className="flex flex-wrap gap-2">
+            {homePlace && workPlace && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setOrigin(homePlace);
+                  setDestination(workPlace);
+                }}
+              >
+                <Briefcase className="mr-2 h-4 w-4" />
+                Home → Work
+              </Button>
+            )}
+            {homePlace && workPlace && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setOrigin(workPlace);
+                  setDestination(homePlace);
+                }}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Work → Home
+              </Button>
+            )}
+            {homePlace && (
+              <Button variant="outline" size="sm" onClick={() => setDestination(homePlace)}>
+                <Home className="mr-2 h-4 w-4" />
+                To home
+              </Button>
+            )}
+            {workPlace && (
+              <Button variant="outline" size="sm" onClick={() => setDestination(workPlace)}>
+                <Briefcase className="mr-2 h-4 w-4" />
+                To work
+              </Button>
+            )}
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2">
           <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
           <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
@@ -157,6 +231,10 @@ function PlannerPage() {
               <RadioGroupItem value="comfort" id="comfort" />
               <Label htmlFor="comfort">Comfort</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="price" id="price" />
+              <Label htmlFor="price">Cheapest</Label>
+            </div>
           </RadioGroup>
         </div>
 
@@ -169,6 +247,7 @@ function PlannerPage() {
               { key: "lessWalking", label: "Less walking" },
               { key: "airConditioned", label: "Air-con" },
               { key: "accessible", label: "Accessible" },
+              { key: "cheaperFare", label: "Lower fare" },
             ].map((f) => (
               <label
                 key={f.key}
@@ -188,6 +267,9 @@ function PlannerPage() {
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
           Find best routes
         </Button>
+        <p className="text-xs text-muted-foreground">
+          Fares estimated for your {cardLabel(cardType).toLowerCase()} — change it in your profile.
+        </p>
       </section>
 
       {recommendation && (
@@ -256,6 +338,10 @@ function RouteCard({
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4 text-muted-foreground" />
             {route.crowdLevel} crowd
+          </div>
+          <div className="flex items-center gap-1 font-medium">
+            <Coins className="h-4 w-4 text-muted-foreground" />
+            {formatFare(route.fareCents)}
           </div>
         </div>
 
