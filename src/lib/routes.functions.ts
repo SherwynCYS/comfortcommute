@@ -16,8 +16,11 @@ const PlanRouteInput = z.object({
   destinationName: z.string().min(1),
   destinationLat: z.number(),
   destinationLng: z.number(),
-  priority: z.enum(["comfort", "time", "balanced"]),
+  priority: z.enum(["comfort", "time", "balanced", "price"]),
   filters: z.record(z.boolean()).default({}),
+  cardType: z
+    .enum(["adult_card", "student_card", "senior_card", "workfare_card", "disability_card", "cash"])
+    .default("adult_card"),
 });
 
 export const planRoute = createServerFn({ method: "POST" })
@@ -26,6 +29,7 @@ export const planRoute = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { buildCandidateRoutes } = await import("./transit.server");
     const { scoreRoute } = await import("./scoring.server");
+    const { estimateFareCents } = await import("./fares");
 
     const candidates = await buildCandidateRoutes(
       { name: data.originName, lat: data.originLat, lng: data.originLng },
@@ -33,6 +37,15 @@ export const planRoute = createServerFn({ method: "POST" })
     );
 
     return candidates
-      .map((route) => ({ ...route, score: scoreRoute(route, data.priority, data.filters) }))
+      .map((route) => {
+        const boardings = route.steps.filter((step) => step.mode !== "walk").length;
+        const fareCents = estimateFareCents({
+          distanceKm: route.rideDistanceKm,
+          cardType: data.cardType,
+          boardings,
+        });
+        const withFare = { ...route, fareCents };
+        return { ...withFare, score: scoreRoute(withFare, data.priority, data.filters) };
+      })
       .sort((a, b) => b.score - a.score);
   });
