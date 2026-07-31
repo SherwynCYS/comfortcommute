@@ -56,7 +56,7 @@ function LandingPage() {
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-2 text-xl font-bold text-foreground">
             <Bus className="h-6 w-6 text-primary" />
-            Nebula Commute
+            ComfortCommute
           </div>
           <Link to={isSignedIn ? "/planner" : "/auth"}>
             <Button variant="outline">{isSignedIn ? "Open planner" : "Sign in"}</Button>

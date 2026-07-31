@@ -19,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/alerts")({
   component: AlertsPage,
   head: () => ({
     meta: [
-      { title: "Alerts | Nebula Commute" },
+      { title: "Alerts | ComfortCommute" },
       { name: "description", content: "Incident and crowd alerts for your favourite routes." },
-      { property: "og:title", content: "Alerts | Nebula Commute" },
+      { property: "og:title", content: "Alerts | ComfortCommute" },
       { property: "og:description", content: "Incident and crowd alerts for your favourite routes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -31,10 +31,11 @@ export const Route = createFileRoute("/_authenticated/alerts")({
 
 function AlertsPage() {
   const queryClient = useQueryClient();
+  const listAlertsFn = useServerFn(listAlerts);
 
   const { data: alerts = [], isLoading } = useQuery({
     queryKey: ["alerts"],
-    queryFn: () => useServerFn(listAlerts)({ data: undefined }),
+    queryFn: () => listAlertsFn({ data: undefined }),
   });
 
   const markRead = useMutation({

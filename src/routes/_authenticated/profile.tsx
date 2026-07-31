@@ -22,10 +22,10 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
   head: () => ({
     meta: [
-      { title: "Profile | Nebula Commute" },
-      { name: "description", content: "Manage your Nebula Commute profile." },
-      { property: "og:title", content: "Profile | Nebula Commute" },
-      { property: "og:description", content: "Manage your Nebula Commute profile." },
+      { title: "Profile | ComfortCommute" },
+      { name: "description", content: "Manage your ComfortCommute profile." },
+      { property: "og:title", content: "Profile | ComfortCommute" },
+      { property: "og:description", content: "Manage your ComfortCommute profile." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -36,10 +36,12 @@ function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState("");
+  const getProfileFn = useServerFn(getProfile);
+  const updateProfileFn = useServerFn(updateProfile);
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
-    queryFn: () => useServerFn(getProfile)({ data: undefined }),
+    queryFn: () => getProfileFn({ data: undefined }),
   });
 
   useEffect(() => {
@@ -49,11 +51,13 @@ function ProfilePage() {
   }, [profile]);
 
   const update = useMutation({
-    mutationFn: useServerFn(updateProfile),
+    mutationFn: updateProfileFn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated");
     },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not save profile"),
   });
 
   const handleSignOut = async () => {

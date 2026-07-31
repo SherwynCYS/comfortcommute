@@ -25,9 +25,9 @@ export const Route = createFileRoute("/_authenticated/favorites")({
   component: FavoritesPage,
   head: () => ({
     meta: [
-      { title: "Favourites | Nebula Commute" },
+      { title: "Favourites | ComfortCommute" },
       { name: "description", content: "Manage your saved routes and stops." },
-      { property: "og:title", content: "Favourites | Nebula Commute" },
+      { property: "og:title", content: "Favourites | ComfortCommute" },
       { property: "og:description", content: "Manage your saved routes and stops." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -37,15 +37,17 @@ export const Route = createFileRoute("/_authenticated/favorites")({
 
 function FavoritesPage() {
   const queryClient = useQueryClient();
+  const listRoutesFn = useServerFn(listFavoriteRoutes);
+  const listStopsFn = useServerFn(listFavoriteStops);
 
   const { data: routes = [] } = useQuery({
     queryKey: ["favorite-routes"],
-    queryFn: () => useServerFn(listFavoriteRoutes)({ data: undefined }),
+    queryFn: () => listRoutesFn({ data: undefined }),
   });
 
   const { data: stops = [] } = useQuery({
     queryKey: ["favorite-stops"],
-    queryFn: () => useServerFn(listFavoriteStops)({ data: undefined }),
+    queryFn: () => listStopsFn({ data: undefined }),
   });
 
   const deleteRoute = useMutation({

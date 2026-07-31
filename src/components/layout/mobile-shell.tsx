@@ -31,7 +31,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-xl items-center justify-between">
           <Link to="/planner" className="flex items-center gap-2 text-lg font-bold text-foreground">
             <Bus className="h-6 w-6 text-primary" />
-            Nebula Commute
+            ComfortCommute
           </Link>
         </div>
       </header>
