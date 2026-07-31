@@ -151,6 +151,13 @@ function toCommuteRoute(
       rideMeters += step.distanceMeters ?? 0;
       transitCount += 1;
 
+      const boardAt = details.stopDetails?.departureStop?.location?.latLng;
+      if (mode === "bus" && boardAt) {
+        boardings.push({ serviceNo: label, lat: boardAt.latitude, lng: boardAt.longitude });
+      }
+
+
+
       steps.push({
         mode,
         from,
