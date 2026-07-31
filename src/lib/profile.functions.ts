@@ -9,10 +9,19 @@ export const getProfile = createServerFn({ method: "GET" })
       .from("profiles")
       .select("*")
       .eq("id", context.userId)
-      .single();
+      .maybeSingle();
 
     if (error) throw new Error(error.message);
-    return data;
+    if (data) return data;
+
+    const { data: created, error: insertError } = await context.supabase
+      .from("profiles")
+      .insert({ id: context.userId })
+      .select()
+      .single();
+
+    if (insertError) throw new Error(insertError.message);
+    return created;
   });
 
 export const updateProfile = createServerFn({ method: "POST" })
@@ -26,13 +35,13 @@ export const updateProfile = createServerFn({ method: "POST" })
       .parse(input)
   )
   .handler(async ({ data, context }) => {
+    const patch: Record<string, unknown> = { id: context.userId };
+    if (data.displayName !== undefined) patch.display_name = data.displayName;
+    if (data.avatarUrl !== undefined) patch.avatar_url = data.avatarUrl;
+
     const { data: updated, error } = await context.supabase
       .from("profiles")
-      .update({
-        display_name: data.displayName,
-        avatar_url: data.avatarUrl,
-      })
-      .eq("id", context.userId)
+      .upsert(patch, { onConflict: "id" })
       .select()
       .single();
 
