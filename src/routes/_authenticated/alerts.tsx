@@ -31,10 +31,11 @@ export const Route = createFileRoute("/_authenticated/alerts")({
 
 function AlertsPage() {
   const queryClient = useQueryClient();
+  const listAlertsFn = useServerFn(listAlerts);
 
   const { data: alerts = [], isLoading } = useQuery({
     queryKey: ["alerts"],
-    queryFn: () => useServerFn(listAlerts)({ data: undefined }),
+    queryFn: () => listAlertsFn({ data: undefined }),
   });
 
   const markRead = useMutation({
