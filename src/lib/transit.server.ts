@@ -87,101 +87,147 @@ function walkStep(from: string, to: string, meters: number): RouteStep {
   };
 }
 
-/** Direct bus journeys built from real LTA bus route data. */
+type ArrivalService = { ServiceNo: string; NextBus?: { EstimatedArrival?: string; Load?: string } };
+
+async function fetchServicesAtStop(
+  code: string,
+  apiKey: string
+): Promise<Map<string, { waitMinutes: number; load: string }>> {
+  const result = new Map<string, { waitMinutes: number; load: string }>();
+  try {
+    const response = await fetch(`${LTA_BASE_URL}/BusArrivalv2?BusStopCode=${code}`, {
+      headers: { AccountKey: apiKey, Accept: "application/json" },
+    });
+    if (!response.ok) return result;
+    const json = (await response.json()) as { Services?: ArrivalService[] };
+    for (const service of json.Services ?? []) {
+      const eta = service.NextBus?.EstimatedArrival;
+      const waitMinutes = eta
+        ? Math.max(0, Math.round((new Date(eta).getTime() - Date.now()) / 60000))
+        : 5;
+      result.set(service.ServiceNo, {
+        waitMinutes: Number.isFinite(waitMinutes) ? Math.min(waitMinutes, 20) : 5,
+        load: service.NextBus?.Load ?? "SEA",
+      });
+    }
+  } catch {
+    /* ignore single-stop failures */
+  }
+  return result;
+}
+
+/**
+ * Direct bus journeys: find services that serve both a stop near the origin and a stop
+ * near the destination, using live LTA arrivals (fast, and gives real crowd + wait data).
+ */
 async function buildBusRoutes(origin: Point, destination: Point, apiKey: string): Promise<CommuteRoute[]> {
   const stops = await getBusStopPlaces(apiKey);
   if (stops.length === 0) return [];
 
-  const originStops = nearest(stops, origin, 10);
-  const destStops = nearest(stops, destination, 10);
+  const originStops = nearest(stops, origin, 5, 1000);
+  const destStops = nearest(stops, destination, 5, 1000);
   if (originStops.length === 0 || destStops.length === 0) return [];
 
-  const originByCode = new Map(originStops.map((s) => [s.place.id.replace("bus-", ""), s]));
-  const destByCode = new Map(destStops.map((s) => [s.place.id.replace("bus-", ""), s]));
+  const codeOf = (place: Place) => place.id.replace("bus-", "");
 
-  const index = await getBusRouteIndex(apiKey);
+  const [originServices, destServices] = await Promise.all([
+    Promise.all(originStops.map((s) => fetchServicesAtStop(codeOf(s.place), apiKey))),
+    Promise.all(destStops.map((s) => fetchServicesAtStop(codeOf(s.place), apiKey))),
+  ]);
+
   type Option = {
     serviceNo: string;
     board: (typeof originStops)[number];
     alight: (typeof destStops)[number];
     rideKm: number;
-    stopsCount: number;
+    waitMinutes: number;
+    load: string;
     totalMinutes: number;
     walkMeters: number;
   };
   const options: Option[] = [];
 
-  for (const [key, list] of index) {
-    const serviceNo = key.split("|")[0];
-    let boardIdx = -1;
-    let board: Option["board"] | null = null;
+  for (let i = 0; i < originStops.length; i++) {
+    for (const [serviceNo, info] of originServices[i]) {
+      for (let j = 0; j < destStops.length; j++) {
+        if (!destServices[j].has(serviceNo)) continue;
+        const board = originStops[i];
+        const alight = destStops[j];
+        if (codeOf(board.place) === codeOf(alight.place)) continue;
 
-    for (let i = 0; i < list.length; i++) {
-      const candidate = originByCode.get(list[i].code);
-      if (candidate && (!board || candidate.meters < board.meters)) {
-        board = candidate;
-        boardIdx = i;
+        const rideKm =
+          (haversineDistance(
+            board.place.lat,
+            board.place.lng,
+            alight.place.lat,
+            alight.place.lng
+          ) *
+            1.35) /
+          1000;
+        if (rideKm < 0.4) continue;
+
+        const walkMeters = board.meters + alight.meters;
+        const rideMinutes = Math.max(2, Math.round((rideKm / 19) * 60));
+        const totalMinutes =
+          rideMinutes + info.waitMinutes + Math.round(walkMeters / WALK_SPEED_M_PER_MIN);
+
+        options.push({
+          serviceNo,
+          board,
+          alight,
+          rideKm,
+          waitMinutes: info.waitMinutes,
+          load: info.load,
+          totalMinutes,
+          walkMeters,
+        });
       }
     }
-    if (!board || boardIdx === -1) continue;
-
-    let alight: Option["alight"] | null = null;
-    let alightIdx = -1;
-    for (let j = boardIdx + 1; j < list.length; j++) {
-      const candidate = destByCode.get(list[j].code);
-      if (candidate && (!alight || candidate.meters < alight.meters)) {
-        alight = candidate;
-        alightIdx = j;
-      }
-    }
-    if (!alight || alightIdx === -1) continue;
-
-    const rideKm = Math.max(0.5, list[alightIdx].distanceKm - list[boardIdx].distanceKm);
-    const stopsCount = alightIdx - boardIdx;
-    const walkMeters = board.meters + alight.meters;
-    const rideMinutes = Math.round((rideKm / 20) * 60 + stopsCount * 0.4);
-    const totalMinutes =
-      rideMinutes + 4 + Math.round(walkMeters / WALK_SPEED_M_PER_MIN); // +4 min average wait
-
-    options.push({ serviceNo, board, alight, rideKm, stopsCount, totalMinutes, walkMeters });
   }
 
-  options.sort((a, b) => a.totalMinutes - b.totalMinutes);
+  // Keep the best option per service number, then the fastest few overall.
+  const bestByService = new Map<string, Option>();
+  for (const opt of options) {
+    const existing = bestByService.get(opt.serviceNo);
+    if (!existing || opt.totalMinutes < existing.totalMinutes) bestByService.set(opt.serviceNo, opt);
+  }
 
-  return options.slice(0, 2).map((opt, i) => {
-    const boardName = opt.board.place.name;
-    const alightName = opt.alight.place.name;
-    const rideMinutes = Math.max(
-      1,
-      opt.totalMinutes - 4 - Math.round(opt.walkMeters / WALK_SPEED_M_PER_MIN)
-    );
+  return Array.from(bestByService.values())
+    .sort((a, b) => a.totalMinutes - b.totalMinutes)
+    .slice(0, 3)
+    .map((opt, i) => {
+      const boardName = opt.board.place.name;
+      const alightName = opt.alight.place.name;
+      const rideMinutes = Math.max(2, Math.round((opt.rideKm / 19) * 60));
+      const crowdLevel = opt.load === "LSD" ? "high" : opt.load === "SDA" ? "medium" : "low";
 
-    return {
-      id: `bus-${opt.serviceNo}-${i}`,
-      summary: `Bus ${opt.serviceNo} · ${origin.name} to ${destination.name}`,
-      totalTimeMinutes: opt.totalMinutes,
-      walkingDistanceMeters: Math.round(opt.walkMeters),
-      transfers: 0,
-      crowdLevel: opt.stopsCount > 20 ? "high" : "medium",
-      seatAvailability: opt.stopsCount <= 12 ? "likely" : "unknown",
-      rideDistanceKm: opt.rideKm,
-      fareCents: 0,
-      steps: [
-        walkStep(origin.name, `${boardName} bus stop`, opt.board.meters),
-        {
-          mode: "bus",
-          from: boardName,
-          to: alightName,
-          durationMinutes: rideMinutes,
-          serviceNo: opt.serviceNo,
-          instruction: `Take bus ${opt.serviceNo} from ${boardName} to ${alightName} (${opt.stopsCount} stops, ~${opt.rideKm.toFixed(1)} km)`,
-        },
-        walkStep(alightName, destination.name, opt.alight.meters),
-      ],
-      score: 0,
-    } satisfies CommuteRoute;
-  });
+      return {
+        id: `bus-${opt.serviceNo}-${i}`,
+        summary: `Bus ${opt.serviceNo} · ${origin.name} to ${destination.name}`,
+        totalTimeMinutes: opt.totalMinutes,
+        walkingDistanceMeters: Math.round(opt.walkMeters),
+        transfers: 0,
+        crowdLevel,
+        seatAvailability: opt.load === "SEA" ? "likely" : opt.load === "LSD" ? "unlikely" : "unknown",
+        rideDistanceKm: opt.rideKm,
+        fareCents: 0,
+        steps: [
+          walkStep(origin.name, `${boardName} bus stop`, opt.board.meters),
+          {
+            mode: "bus",
+            from: boardName,
+            to: alightName,
+            durationMinutes: rideMinutes,
+            serviceNo: opt.serviceNo,
+            instruction: `Take bus ${opt.serviceNo} from ${boardName} to ${alightName} (~${opt.rideKm.toFixed(1)} km, next bus in ~${opt.waitMinutes} min)`,
+          },
+          walkStep(alightName, destination.name, opt.alight.meters),
+        ],
+        score: 0,
+      } satisfies CommuteRoute;
+    });
 }
+
 
 /** MRT/LRT journey using the nearest stations to each end. */
 function buildRailRoute(origin: Point, destination: Point): CommuteRoute | null {
