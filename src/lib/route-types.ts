@@ -1,4 +1,4 @@
-export type RoutePriority = "comfort" | "time" | "balanced";
+export type RoutePriority = "comfort" | "time" | "balanced" | "price";
 
 export type RouteFilters = {
   seatAvailability?: boolean;
@@ -6,6 +6,7 @@ export type RouteFilters = {
   lessWalking?: boolean;
   airConditioned?: boolean;
   accessible?: boolean;
+  cheaperFare?: boolean;
 };
 
 export type RouteStep = {
@@ -28,4 +29,8 @@ export type CommuteRoute = {
   seatAvailability: "likely" | "unlikely" | "unknown";
   steps: RouteStep[];
   score: number;
+  /** In-vehicle distance in km, used for fare estimation. */
+  rideDistanceKm: number;
+  /** Estimated fare in cents for the traveller's fare card. */
+  fareCents: number;
 };
