@@ -11,6 +11,7 @@ type GTransitDetails = {
     arrivalStop?: GStop;
     departureStop?: GStop;
     departureTime?: string;
+    arrivalTime?: string;
   };
   headsign?: string;
   stopCount?: number;
@@ -26,15 +27,31 @@ type GStep = {
   travelMode?: string;
   distanceMeters?: number;
   staticDuration?: string;
+  duration?: string;
   navigationInstruction?: { instructions?: string };
   transitDetails?: GTransitDetails;
 };
 
+type GMoney = { currencyCode?: string; units?: string; nanos?: number };
+
 type GRoute = {
   duration?: string;
   distanceMeters?: number;
-  legs?: { steps?: GStep[] }[];
+  travelAdvisory?: { transitFare?: GMoney };
+  legs?: {
+    steps?: GStep[];
+    startLocation?: { latLng?: LatLng };
+    endLocation?: { latLng?: LatLng };
+  }[];
 };
+
+function fareToCents(money?: GMoney): number | undefined {
+  if (!money) return undefined;
+  const units = Number.parseInt(money.units ?? "0", 10) || 0;
+  const nanos = money.nanos ?? 0;
+  const cents = Math.round(units * 100 + nanos / 1e7);
+  return cents > 0 ? cents : undefined;
+}
 
 export type Point = { name: string; lat: number; lng: number };
 
@@ -65,6 +82,8 @@ function vehicleToMode(type?: string): RouteStep["mode"] {
 const FIELD_MASK = [
   "routes.duration",
   "routes.distanceMeters",
+  "routes.travelAdvisory.transitFare",
+  "routes.legs.steps.duration",
   "routes.legs.steps.travelMode",
   "routes.legs.steps.distanceMeters",
   "routes.legs.steps.staticDuration",
@@ -94,6 +113,8 @@ async function computeTransitRoutes(
       },
       travelMode: "TRANSIT",
       computeAlternativeRoutes: true,
+      // Real-time departure so waiting time and live timetables are baked in.
+      departureTime: new Date(Date.now() + 60_000).toISOString(),
       languageCode: "en-SG",
       regionCode: "SG",
       units: "METRIC",
@@ -134,10 +155,12 @@ function toCommuteRoute(
   let walkMeters = 0;
   let rideMeters = 0;
   let transitCount = 0;
+  let departureTime: string | undefined;
+  let arrivalTime: string | undefined;
 
 
   for (const step of gsteps) {
-    const durationMinutes = Math.max(1, minutes(step.staticDuration));
+    const durationMinutes = Math.max(1, minutes(step.duration ?? step.staticDuration));
 
     if (step.travelMode === "TRANSIT" && step.transitDetails) {
       const details = step.transitDetails;
@@ -150,6 +173,8 @@ function toCommuteRoute(
 
       rideMeters += step.distanceMeters ?? 0;
       transitCount += 1;
+      departureTime ??= details.stopDetails?.departureTime;
+      if (details.stopDetails?.arrivalTime) arrivalTime = details.stopDetails.arrivalTime;
 
       const boardAt = details.stopDetails?.departureStop?.location?.latLng;
       if (mode === "bus" && boardAt) {
@@ -220,6 +245,10 @@ function toCommuteRoute(
       seatAvailability: "unknown",
       rideDistanceKm: rideMeters / 1000,
       fareCents: 0,
+      providerFareCents: fareToCents(route.travelAdvisory?.transitFare),
+      departureTime,
+      arrivalTime,
+      baselineRank: index,
       steps: merged,
       score: 0,
     },
