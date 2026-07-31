@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const LTA_BASE_URL = "http://datamall2.mytransport.sg/ltaodataservice";
+const LTA_BASE_URL = "https://datamall2.mytransport.sg/ltaodataservice";
 
 async function ltaFetch(path: string, apiKey: string) {
   const response = await fetch(`${LTA_BASE_URL}${path}`, {

@@ -19,7 +19,7 @@ type LtaBusStop = {
   Longitude: number;
 };
 
-const LTA_BASE_URL = "http://datamall2.mytransport.sg/ltaodataservice";
+const LTA_BASE_URL = "https://datamall2.mytransport.sg/ltaodataservice";
 
 let busStopCache: { stops: Place[]; fetchedAt: number } | null = null;
 const CACHE_TTL_MS = 1000 * 60 * 60 * 12;
