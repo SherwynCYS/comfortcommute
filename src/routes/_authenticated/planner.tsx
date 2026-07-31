@@ -7,6 +7,9 @@ import { MobileShell } from "@/components/layout/mobile-shell";
 import { planRoute, type CommuteRoute, type RouteFilters, type RoutePriority } from "@/lib/routes.functions";
 import { recommendRoute, type AiRecommendation } from "@/lib/ai.functions";
 import { createFavoriteRoute } from "@/lib/favorites.functions";
+import { PlaceSearch } from "@/components/planner/place-search";
+import type { PlaceResult } from "@/lib/places.functions";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,21 +39,9 @@ export const Route = createFileRoute("/_authenticated/planner")({
   }),
 });
 
-const sampleOrigins = [
-  { name: "Jurong East", lat: 1.3332, lng: 103.7418 },
-  { name: "Tampines", lat: 1.3525, lng: 103.9447 },
-  { name: "Orchard", lat: 1.3048, lng: 103.8318 },
-];
-
-const sampleDestinations = [
-  { name: "Raffles Place", lat: 1.2839, lng: 103.8525 },
-  { name: "Dhoby Ghaut", lat: 1.2991, lng: 103.8458 },
-  { name: "Buona Vista", lat: 1.3074, lng: 103.7908 },
-];
-
 function PlannerPage() {
-  const [origin, setOrigin] = useState(sampleOrigins[0]);
-  const [destination, setDestination] = useState(sampleDestinations[0]);
+  const [origin, setOrigin] = useState<PlaceResult | null>(null);
+  const [destination, setDestination] = useState<PlaceResult | null>(null);
   const [priority, setPriority] = useState<RoutePriority>("balanced");
   const [filters, setFilters] = useState<RouteFilters>({
     seatAvailability: false,
@@ -63,6 +54,7 @@ function PlannerPage() {
   const [recommendation, setRecommendation] = useState<AiRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
 
+
   const planFn = useServerFn(planRoute);
   const recommendFn = useServerFn(recommendRoute);
   const saveRouteFn = useServerFn(createFavoriteRoute);
@@ -74,8 +66,13 @@ function PlannerPage() {
   });
 
   const handlePlan = async () => {
+    if (!origin || !destination) {
+      toast.error("Pick both a start and a destination");
+      return;
+    }
     setLoading(true);
     try {
+
       const candidates = await planFn({
         data: {
           originName: origin.name,
@@ -112,7 +109,9 @@ function PlannerPage() {
   };
 
   const handleSave = (route: CommuteRoute) => {
+    if (!origin || !destination) return;
     saveMutation.mutate({
+
       data: {
         name: `${origin.name} → ${destination.name}`,
         originName: origin.name,
@@ -134,44 +133,10 @@ function PlannerPage() {
           <h2 className="text-xl font-semibold">Plan your journey</h2>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="origin">From</Label>
-            <select
-              id="origin"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={origin.name}
-              onChange={(e) => {
-                const found = sampleOrigins.find((o) => o.name === e.target.value);
-                if (found) setOrigin(found);
-              }}
-            >
-              {sampleOrigins.map((o) => (
-                <option key={o.name} value={o.name}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="destination">To</Label>
-            <select
-              id="destination"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={destination.name}
-              onChange={(e) => {
-                const found = sampleDestinations.find((d) => d.name === e.target.value);
-                if (found) setDestination(found);
-              }}
-            >
-              {sampleDestinations.map((d) => (
-                <option key={d.name} value={d.name}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
+          <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
         </div>
+
 
         <div className="space-y-2">
           <Label>Priority</Label>
