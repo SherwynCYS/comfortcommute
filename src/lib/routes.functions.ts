@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { getBusArrivals, getBusStops, getTrainServiceAlerts } from "./lta.functions";
 
@@ -186,6 +187,7 @@ function scoreRoute(route: CommuteRoute, priority: RoutePriority, filters: Route
 }
 
 export const planRoute = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .validator((input: unknown) => PlanRouteInput.parse(input))
   .handler(async ({ data }) => {
     const origin = {
