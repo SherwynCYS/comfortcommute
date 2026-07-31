@@ -128,21 +128,48 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          card_type: string
           created_at: string
           display_name: string | null
+          home_lat: number | null
+          home_lng: number | null
+          home_name: string | null
           id: string
+          occupation: string
+          updated_at: string
+          work_lat: number | null
+          work_lng: number | null
+          work_name: string | null
         }
         Insert: {
           avatar_url?: string | null
+          card_type?: string
           created_at?: string
           display_name?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          home_name?: string | null
           id: string
+          occupation?: string
+          updated_at?: string
+          work_lat?: number | null
+          work_lng?: number | null
+          work_name?: string | null
         }
         Update: {
           avatar_url?: string | null
+          card_type?: string
           created_at?: string
           display_name?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          home_name?: string | null
           id?: string
+          occupation?: string
+          updated_at?: string
+          work_lat?: number | null
+          work_lng?: number | null
+          work_name?: string | null
         }
         Relationships: []
       }
