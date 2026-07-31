@@ -279,10 +279,21 @@ export async function buildCandidateRoutes(
   origin: Point,
   destination: Point
 ): Promise<CommuteRoute[]> {
+  // Google Routes is the baseline itinerary source (real timetables and transfers);
+  // the local heuristic engine below is the fallback when it is unavailable.
+  try {
+    const { buildGoogleTransitRoutes } = await import("./google-routes.server");
+    const googleRoutes = await buildGoogleTransitRoutes(origin, destination);
+    if (googleRoutes.length > 0) return googleRoutes;
+  } catch (error) {
+    console.error("Google Routes baseline failed, falling back to local engine:", error);
+  }
+
   const apiKey = process.env.LTA_DATAMALL_API_KEY;
   const directMeters = haversineDistance(origin.lat, origin.lng, destination.lat, destination.lng);
 
   const candidates: CommuteRoute[] = [];
+
 
   if (directMeters <= 1200) candidates.push(walkOnlyRoute(origin, destination));
 
