@@ -29,6 +29,22 @@ export type NearbyStop = {
   meters: number;
 };
 
+export type BusJourneyStop = {
+  code: string;
+  name: string;
+  road: string;
+  lat: number;
+  lng: number;
+  sequence: number;
+  isCurrent: boolean;
+};
+
+export type BusJourney = {
+  serviceNo: string;
+  direction: number;
+  stops: BusJourneyStop[];
+};
+
 type RawBus = {
   EstimatedArrival?: string;
   Latitude?: string;
@@ -118,4 +134,68 @@ export async function lookupStop(code: string, apiKey: string): Promise<NearbySt
     lng: match.lng,
     meters: 0,
   };
+}
+
+type RawRouteStop = {
+  ServiceNo?: string;
+  Direction?: number;
+  StopSequence?: number;
+  BusStopCode?: string;
+};
+
+let routeCache: { expiresAt: number; rows: RawRouteStop[] } | null = null;
+
+async function getBusRouteRows(apiKey: string) {
+  if (routeCache && routeCache.expiresAt > Date.now()) return routeCache.rows;
+
+  const rows: RawRouteStop[] = [];
+  for (let skip = 0; skip < 100000; skip += 500) {
+    const response = await fetch(`${LTA_BASE_URL}/BusRoutes?$skip=${skip}`, {
+      headers: { AccountKey: apiKey, Accept: "application/json" },
+    });
+    if (!response.ok) throw new Error(`LTA bus routes error ${response.status}`);
+    const page = (await response.json()) as { value?: RawRouteStop[] };
+    const batch = page.value ?? [];
+    rows.push(...batch);
+    if (batch.length < 500) break;
+  }
+
+  routeCache = { expiresAt: Date.now() + 6 * 60 * 60 * 1000, rows };
+  return rows;
+}
+
+export async function fetchBusJourney(
+  serviceNo: string,
+  currentStopCode: string,
+  apiKey: string
+): Promise<BusJourney[]> {
+  const [rows, places] = await Promise.all([getBusRouteRows(apiKey), getBusStopPlaces(apiKey)]);
+  const placeByCode = new Map(places.map((place) => [place.id.replace("bus-", ""), place]));
+  const matching = rows.filter(
+    (row) => row.ServiceNo?.toLowerCase() === serviceNo.toLowerCase() && row.BusStopCode
+  );
+  const directions = [...new Set(matching.map((row) => row.Direction ?? 1))];
+
+  return directions
+    .map((direction) => ({
+      serviceNo,
+      direction,
+      stops: matching
+        .filter((row) => (row.Direction ?? 1) === direction)
+        .sort((a, b) => (a.StopSequence ?? 0) - (b.StopSequence ?? 0))
+        .map((row) => {
+          const code = row.BusStopCode ?? "";
+          const place = placeByCode.get(code);
+          return {
+            code,
+            name: place?.name ?? `Bus stop ${code}`,
+            road: place?.description ?? "",
+            lat: place?.lat ?? 0,
+            lng: place?.lng ?? 0,
+            sequence: row.StopSequence ?? 0,
+            isCurrent: code === currentStopCode,
+          };
+        }),
+    }))
+    .filter((journey) => journey.stops.some((stop) => stop.isCurrent));
 }
