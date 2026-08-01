@@ -124,16 +124,19 @@ function FavoritesPage() {
             <EmptyState message="No saved stops yet." />
           ) : (
             stops.map((stop) => (
-              <Card key={stop.id}>
+              <Card key={stop.id} className="border-border/70 shadow-soft">
                 <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    {stop.transport_type === "bus" ? (
-                      <Bus className="h-5 w-5 text-primary" />
-                    ) : (
-                      <MapPin className="h-5 w-5 text-primary" />
-                    )}
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                      {stop.transport_type === "bus" ? (
+                        <Bus className="h-4 w-4" />
+                      ) : (
+                        <MapPin className="h-4 w-4" />
+                      )}
+                    </span>
                     <CardTitle className="text-base">{stop.stop_name}</CardTitle>
                   </div>
+
                   {stop.stop_code && (
                     <p className="text-xs text-muted-foreground">Code: {stop.stop_code}</p>
                   )}
