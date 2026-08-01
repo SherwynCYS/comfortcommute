@@ -90,13 +90,15 @@ function AlertsPage() {
         ) : (
           alerts.map((alert) => (
             <Card key={alert.id} className={alert.is_read ? "opacity-70 shadow-soft" : "shadow-soft"}>
-
             <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-base">{alert.title}</CardTitle>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                    <Bell className="h-4 w-4" />
+                  </span>
+                  <CardTitle className="text-base leading-snug">{alert.title}</CardTitle>
                 </div>
+
                 <SeverityBadge severity={alert.severity} />
               </div>
               <p className="text-xs text-muted-foreground">
