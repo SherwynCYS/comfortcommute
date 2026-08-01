@@ -68,14 +68,20 @@ function FavoritesPage() {
 
   return (
     <MobileShell>
-      <div className="space-y-6 p-4">
-        <h2 className="text-xl font-semibold">Your favourites</h2>
+      <div className="space-y-5 p-4">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Your favourites</h1>
+          <p className="text-sm text-muted-foreground">
+            Saved journeys and stops we watch for disruptions.
+          </p>
+        </div>
 
-      <Tabs defaultValue="routes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="routes">Routes</TabsTrigger>
-          <TabsTrigger value="stops">Stops</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="routes" className="w-full space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="routes">Routes</TabsTrigger>
+            <TabsTrigger value="stops">Stops</TabsTrigger>
+          </TabsList>
+
 
         <TabsContent value="routes" className="space-y-4">
           {routes.length === 0 ? (
