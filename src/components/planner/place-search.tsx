@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { Input } from "@/components/ui/input";
-import { Loader2, MapPin, TrainFront, Bus, X } from "lucide-react";
+import { Loader2, MapPin, TrainFront, Bus, X, Star } from "lucide-react";
 
 type Props = {
   id: string;
