@@ -215,7 +215,7 @@ function AuthPage() {
               <Button
                 className="w-full"
                 onClick={() => handleEmailAuth("login")}
-                disabled={loading}
+                disabled={loading || !agreed}
               >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Sign in
@@ -245,7 +245,7 @@ function AuthPage() {
               <Button
                 className="w-full"
                 onClick={() => handleEmailAuth("signup")}
-                disabled={loading}
+                disabled={loading || !agreed}
               >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Create account
