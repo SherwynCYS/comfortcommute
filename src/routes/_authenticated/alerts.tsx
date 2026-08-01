@@ -67,7 +67,7 @@ function AlertsPage() {
 
   const sync = useMutation({
     mutationFn: useServerFn(syncAlertsFromLta),
-    onSuccess: (result: { inserted: number }, _vars, _ctx) => {
+    onSuccess: (result: { inserted: number }) => {
       queryClient.invalidateQueries({ queryKey: ["alerts"] });
       setLastSync(new Date());
       if (autoSynced.current) {
