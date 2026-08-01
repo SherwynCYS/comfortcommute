@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Bus, Heart, Bell, User } from "lucide-react";
+import { Bus, Heart, Bell, User, Radio } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LegalFooter } from "@/components/layout/legal-footer";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/planner", label: "Plan", icon: Bus },
+  { to: "/live", label: "Live", icon: Radio },
   { to: "/favorites", label: "Saved", icon: Heart },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/profile", label: "Profile", icon: User },
@@ -88,7 +89,7 @@ function NavItem({
     <Link
       to={item.to}
       className={cn(
-        "relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-medium transition-all",
+        "relative flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-all",
         isActive
           ? "bg-accent text-accent-foreground"
           : "text-muted-foreground hover:text-foreground",
