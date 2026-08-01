@@ -59,7 +59,9 @@ export default function MrtMap() {
       marker.addTo(map);
     }
 
-    return () => map.remove();
+    return () => {
+      map.remove();
+    };
   }, []);
 
   return <div ref={containerRef} className="h-full w-full" aria-label="Interactive Singapore MRT and LRT map" />;
