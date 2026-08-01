@@ -7,8 +7,19 @@ import { listAlerts, markAlertRead, deleteAlert, syncAlertsFromLta } from "@/lib
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Check, RefreshCw, Trash2 } from "lucide-react";
+import { Bell, BellOff, Check, CheckCheck, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect, useRef, useState } from "react";
+
+function timeAgo(date: Date) {
+  const secs = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
+  if (secs < 60) return "just now";
+  const mins = Math.round(secs / 60);
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  return `${Math.round(hours / 24)} d ago`;
+}
 
 export const Route = createFileRoute("/_authenticated/alerts")({
   ssr: false,
@@ -32,10 +43,16 @@ export const Route = createFileRoute("/_authenticated/alerts")({
 function AlertsPage() {
   const queryClient = useQueryClient();
   const listAlertsFn = useServerFn(listAlerts);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [tick, setTick] = useState(0);
+  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const autoSynced = useRef(false);
 
   const { data: alerts = [], isLoading } = useQuery({
     queryKey: ["alerts"],
     queryFn: () => listAlertsFn({ data: undefined }),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const markRead = useMutation({
@@ -50,32 +67,86 @@ function AlertsPage() {
 
   const sync = useMutation({
     mutationFn: useServerFn(syncAlertsFromLta),
-    onSuccess: (result: { inserted: number }) => {
+    onSuccess: (result: { inserted: number }, _vars, _ctx) => {
       queryClient.invalidateQueries({ queryKey: ["alerts"] });
-      toast.success(`${result.inserted} new alert(s) synced`);
+      setLastSync(new Date());
+      if (autoSynced.current) {
+        toast.success(
+          result.inserted > 0 ? `${result.inserted} new alert(s)` : "You're up to date",
+        );
+      }
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Sync failed"),
   });
 
+  const syncMutate = sync.mutate;
+
+  // Pull the latest network alerts on open, then keep them fresh every 2 minutes.
+  useEffect(() => {
+    syncMutate({ data: undefined });
+    const id = setInterval(() => syncMutate({ data: undefined }), 120_000);
+    return () => clearInterval(id);
+  }, [syncMutate]);
+
+  // Re-render so the "updated x ago" label stays honest.
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  void tick;
+
+  const unread = alerts.filter((a) => !a.is_read);
+  const visible = showUnreadOnly ? unread : alerts;
+
+  const markAllRead = () => {
+    unread.forEach((a) => markRead.mutate({ data: { id: a.id } }));
+  };
+
   return (
     <MobileShell>
       <div className="space-y-5 p-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold">Alerts</h1>
             <p className="text-sm text-muted-foreground">
-              Disruptions touching your saved journeys.
+              Live LTA service messages across the whole network.
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {sync.isPending
+                ? "Checking for updates…"
+                : lastSync
+                  ? `Updated ${timeAgo(lastSync)}`
+                  : "Waiting for first update"}
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => sync.mutate({ data: undefined })}
+            onClick={() => {
+              autoSynced.current = true;
+              sync.mutate({ data: undefined });
+            }}
             disabled={sync.isPending}
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${sync.isPending ? "animate-spin" : ""}`} />
-            Sync
+            Refresh
           </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={showUnreadOnly ? "default" : "secondary"}
+            size="sm"
+            onClick={() => setShowUnreadOnly((v) => !v)}
+          >
+            {showUnreadOnly ? "Showing unread" : `Unread (${unread.length})`}
+          </Button>
+          {unread.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={markAllRead}>
+              <CheckCheck className="mr-2 h-4 w-4" />
+              Mark all read
+            </Button>
+          )}
         </div>
 
         <p className="rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed text-muted-foreground">
@@ -85,10 +156,16 @@ function AlertsPage() {
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading alerts…</p>
-        ) : alerts.length === 0 ? (
-          <EmptyState message="No alerts yet. Sync to check for incidents affecting your favourites." />
+        ) : visible.length === 0 ? (
+          <EmptyState
+            message={
+              showUnreadOnly
+                ? "Nothing unread — you're all caught up."
+                : "No service messages right now. The network is running normally."
+            }
+          />
         ) : (
-          alerts.map((alert) => (
+          visible.map((alert) => (
             <Card key={alert.id} className={alert.is_read ? "opacity-70 shadow-soft" : "shadow-soft"}>
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between gap-3">
@@ -151,7 +228,7 @@ function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
       <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-mint text-primary">
-        <Bell className="h-6 w-6" />
+        <BellOff className="h-6 w-6" />
       </span>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
