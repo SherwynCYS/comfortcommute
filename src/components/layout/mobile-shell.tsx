@@ -1,10 +1,11 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Bus, Heart, Bell, User, Radio } from "lucide-react";
+import { Bus, Heart, Bell, User, Radio, Sun, Moon, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LegalFooter } from "@/components/layout/legal-footer";
 import { ConsentGate } from "@/components/onboarding/consent-gate";
 import { cn } from "@/lib/utils";
+import { useTheme, type ThemeMode } from "@/lib/theme";
 
 
 const navItems = [
@@ -52,12 +53,15 @@ function MobileShellInner({ children }: { children: React.ReactNode }) {
             </span>
             ComfortCommute
           </Link>
-          <Link
-            to="/legal"
-            className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Disclaimer
-          </Link>
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <Link
+              to="/legal"
+              className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Disclaimer
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -82,6 +86,24 @@ function MobileShellInner({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { mode, setMode } = useTheme();
+  const order: ThemeMode[] = ["light", "dark", "system"];
+  const Icon = mode === "light" ? Sun : mode === "dark" ? Moon : Monitor;
+
+  return (
+    <button
+      type="button"
+      aria-label={`Theme: ${mode}. Tap to change`}
+      title={`Theme: ${mode}`}
+      onClick={() => setMode(order[(order.indexOf(mode) + 1) % order.length]!)}
+      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/70 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+    >
+      <Icon className="h-4 w-4" />
+    </button>
   );
 }
 

@@ -6,6 +6,7 @@ import { listFavoriteRoutes, listFavoriteStops } from "@/lib/favorites.functions
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/layout/mobile-shell";
 import { PlaceSearch } from "@/components/planner/place-search";
+import { AppearanceSettings } from "@/components/settings/appearance-settings";
 import type { PlaceResult } from "@/lib/places.functions";
 import { CARD_TYPES, OCCUPATIONS, cardLabel, occupationLabel, type CardType, type Occupation } from "@/lib/fares";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -286,6 +287,8 @@ function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
+
+        <AppearanceSettings />
 
         <Separator />
 

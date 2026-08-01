@@ -9,6 +9,7 @@ import {
   listFavoriteStops,
   deleteFavoriteRoute,
   deleteFavoriteStop,
+  createFavoriteStop,
 } from "@/lib/favorites.functions";
 import {
   listFavoritePlaces,
@@ -22,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Bus, MapPin, Trash2, Heart, Star, Plus } from "lucide-react";
+import { Bus, MapPin, Trash2, Heart, Star, Plus, TrainFront } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/favorites")({
@@ -179,8 +180,9 @@ function FavoritesPage() {
         </TabsContent>
 
         <TabsContent value="stops" className="space-y-4">
+          <AddStopForm />
           {stops.length === 0 ? (
-            <EmptyState message="No saved stops yet." />
+            <EmptyState message="No saved stops yet. Search a bus stop or MRT station above to pin it here." />
           ) : (
             stops.map((stop) => (
               <Card key={stop.id} className="border-border/70 shadow-soft">
@@ -218,6 +220,67 @@ function FavoritesPage() {
       </Tabs>
       </div>
     </MobileShell>
+  );
+}
+
+function AddStopForm() {
+  const queryClient = useQueryClient();
+  const [stop, setStop] = useState<PlaceResult | null>(null);
+
+  const create = useMutation({
+    mutationFn: useServerFn(createFavoriteStop),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorite-stops"] });
+      setStop(null);
+      toast.success("Stop saved");
+    },
+    onError: () => toast.error("Couldn't save that stop"),
+  });
+
+  const isTransit = stop?.type === "bus" || stop?.type === "rail";
+
+  return (
+    <Card className="border-border/70 shadow-soft">
+      <CardContent className="space-y-3 p-4">
+        <PlaceSearch
+          id="favorite-stop"
+          label="Add a bus stop or MRT station"
+          value={stop}
+          onChange={setStop}
+          placeholder="Search e.g. 'Bishan MRT' or a bus stop name"
+        />
+        {stop && !isTransit && (
+          <p className="text-xs text-muted-foreground">
+            That's an address — save it under the Places tab instead.
+          </p>
+        )}
+        <Button
+          className="w-full"
+          disabled={!isTransit || create.isPending}
+          onClick={() =>
+            stop &&
+            isTransit &&
+            create.mutate({
+              data: {
+                stopName: stop.name,
+                stopCode: stop.id.startsWith("bus-")
+                  ? stop.id.slice(4)
+                  : stop.description || undefined,
+                stopLat: stop.lat,
+                stopLng: stop.lng,
+                transportType: stop.type === "bus" ? "bus" : "mrt",
+              },
+            })
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Save stop
+        </Button>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <TrainFront className="h-3.5 w-3.5" /> Saved stops power live arrivals and alerts.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
