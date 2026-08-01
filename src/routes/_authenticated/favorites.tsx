@@ -88,18 +88,21 @@ function FavoritesPage() {
             <EmptyState message="No saved routes yet. Plan a journey and save it." />
           ) : (
             routes.map((route) => (
-              <Card key={route.id}>
+              <Card key={route.id} className="border-border/70 shadow-soft">
                 <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <CardTitle className="text-base">{route.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">
+                      <CardTitle className="text-base leading-snug">{route.name}</CardTitle>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {route.origin_name} → {route.destination_name}
                       </p>
                     </div>
-                    <Badge variant="outline">{route.priority}</Badge>
+                    <Badge variant="secondary" className="shrink-0 capitalize">
+                      {route.priority}
+                    </Badge>
                   </div>
                 </CardHeader>
+
                 <CardContent>
                   <Button
                     variant="ghost"
