@@ -9,7 +9,7 @@ const RecommendInput = z.object({
   originName: z.string(),
   destinationName: z.string(),
   priority: z.enum(["comfort", "time", "balanced", "price"]),
-  filters: z.record(z.boolean()).default({}),
+  filters: z.record(z.string(), z.boolean()).default({}),
   routes: z.array(z.any()),
 });
 

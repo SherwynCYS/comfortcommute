@@ -11,7 +11,7 @@ const FavoriteRouteInput = z.object({
   destinationLat: z.number().optional(),
   destinationLng: z.number().optional(),
   priority: z.enum(["comfort", "time", "balanced", "price"]).default("balanced"),
-  filters: z.record(z.boolean()).default({}),
+  filters: z.record(z.string(), z.boolean()).default({}),
 });
 
 const FavoriteStopInput = z.object({
@@ -51,7 +51,7 @@ export const createFavoriteRoute = createServerFn({ method: "POST" })
         destination_lat: data.destinationLat,
         destination_lng: data.destinationLng,
         priority: data.priority,
-        filters: data.filters,
+        filters: data.filters as Record<string, boolean>,
       })
       .select()
       .single();

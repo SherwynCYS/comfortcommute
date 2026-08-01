@@ -9,8 +9,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bus, Loader2 } from "lucide-react";
 
+function safeNext(value: unknown): string | undefined {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
+  validateSearch: (search: Record<string, unknown>): { next?: string } => {
+    const next = safeNext(search.next);
+    return next ? { next } : {};
+  },
+
   head: () => ({
     meta: [
       { title: "Sign in | ComfortCommute" },
@@ -25,6 +34,11 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const router = useRouter();
+  const { next } = Route.useSearch();
+  const goNext = () => {
+    if (next) window.location.href = next;
+    else void router.navigate({ to: "/planner" });
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +50,7 @@ function AuthPage() {
 
     void supabase.auth.getSession().then(({ data }) => {
       if (mounted && data.session) {
-        void router.navigate({ to: "/planner" });
+        goNext();
       }
     });
 
@@ -44,7 +58,7 @@ function AuthPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-        void router.navigate({ to: "/planner" });
+        goNext();
       }
     });
 
@@ -52,7 +66,8 @@ function AuthPage() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, next]);
 
   const handleEmailAuth = async (type: "signup" | "login") => {
     setLoading(true);
@@ -64,18 +79,20 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: next ? `${window.location.origin}/auth?next=${encodeURIComponent(next)}` : window.location.origin,
+          },
         });
         if (error) throw error;
         if (data.session) {
-          router.navigate({ to: "/planner" });
+          goNext();
           return;
         }
         setMessage("Account created. You can sign in now.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
         if (error) throw error;
-        router.navigate({ to: "/planner" });
+        goNext();
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
@@ -117,7 +134,9 @@ function AuthPage() {
     setLoading(true);
     setMessage(null);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth`,
+      redirect_uri: next
+        ? `${window.location.origin}/auth?next=${encodeURIComponent(next)}`
+        : `${window.location.origin}/auth`,
     });
     if (result.error) {
       setMessage(result.error.message);
@@ -125,7 +144,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    router.navigate({ to: "/planner" });
+    goNext();
   };
 
   return (

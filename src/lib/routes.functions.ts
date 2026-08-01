@@ -17,7 +17,7 @@ const PlanRouteInput = z.object({
   destinationLat: z.number(),
   destinationLng: z.number(),
   priority: z.enum(["comfort", "time", "balanced", "price"]),
-  filters: z.record(z.boolean()).default({}),
+  filters: z.record(z.string(), z.boolean()).default({}),
   cardType: z
     .enum(["adult_card", "student_card", "senior_card", "workfare_card", "disability_card", "cash"])
     .default("adult_card"),
