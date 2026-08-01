@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sync_incident_vote_counts() FROM PUBLIC, anon, authenticated;

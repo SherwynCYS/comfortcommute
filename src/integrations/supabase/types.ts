@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_places: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          label: string
+          lat: number | null
+          lng: number | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          label: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          label?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorite_routes: {
         Row: {
           created_at: string
@@ -125,6 +158,83 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_reports: {
+        Row: {
+          bus_stop_code: string | null
+          confirms: number
+          created_at: string
+          description: string | null
+          dismisses: number
+          expires_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          service_no: string | null
+          type: Database["public"]["Enums"]["incident_type"]
+          user_id: string
+        }
+        Insert: {
+          bus_stop_code?: string | null
+          confirms?: number
+          created_at?: string
+          description?: string | null
+          dismisses?: number
+          expires_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          service_no?: string | null
+          type: Database["public"]["Enums"]["incident_type"]
+          user_id: string
+        }
+        Update: {
+          bus_stop_code?: string | null
+          confirms?: number
+          created_at?: string
+          description?: string | null
+          dismisses?: number
+          expires_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          service_no?: string | null
+          type?: Database["public"]["Enums"]["incident_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      incident_votes: {
+        Row: {
+          created_at: string
+          id: string
+          is_confirm: boolean
+          report_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_confirm: boolean
+          report_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_confirm?: boolean
+          report_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_votes_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "incident_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -136,6 +246,8 @@ export type Database = {
           home_name: string | null
           id: string
           occupation: string
+          points: number
+          reports_count: number
           updated_at: string
           work_lat: number | null
           work_lng: number | null
@@ -151,6 +263,8 @@ export type Database = {
           home_name?: string | null
           id: string
           occupation?: string
+          points?: number
+          reports_count?: number
           updated_at?: string
           work_lat?: number | null
           work_lng?: number | null
@@ -166,6 +280,8 @@ export type Database = {
           home_name?: string | null
           id?: string
           occupation?: string
+          points?: number
+          reports_count?: number
           updated_at?: string
           work_lat?: number | null
           work_lng?: number | null
@@ -181,7 +297,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      incident_type:
+        | "crowding"
+        | "breakdown"
+        | "delay"
+        | "no_show"
+        | "accessibility"
+        | "police"
+        | "hazard"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -308,6 +432,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      incident_type: [
+        "crowding",
+        "breakdown",
+        "delay",
+        "no_show",
+        "accessibility",
+        "police",
+        "hazard",
+        "other",
+      ],
+    },
   },
 } as const

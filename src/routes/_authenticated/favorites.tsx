@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,11 +10,19 @@ import {
   deleteFavoriteRoute,
   deleteFavoriteStop,
 } from "@/lib/favorites.functions";
+import {
+  listFavoritePlaces,
+  createFavoritePlace,
+  deleteFavoritePlace,
+} from "@/lib/favorite-places.functions";
+import { PlaceSearch } from "@/components/planner/place-search";
+import type { PlaceResult } from "@/lib/places.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Bus, MapPin, Trash2, Heart } from "lucide-react";
+import { Bus, MapPin, Trash2, Heart, Star, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/favorites")({
@@ -66,21 +75,71 @@ function FavoritesPage() {
     },
   });
 
+  const listPlacesFn = useServerFn(listFavoritePlaces);
+  const { data: places = [] } = useQuery({
+    queryKey: ["favorite-places"],
+    queryFn: () => listPlacesFn({ data: undefined }),
+  });
+
+  const deletePlace = useMutation({
+    mutationFn: useServerFn(deleteFavoritePlace),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorite-places"] });
+      toast.success("Place removed");
+    },
+  });
+
   return (
     <MobileShell>
       <div className="space-y-5 p-4">
         <div>
           <h1 className="font-display text-2xl font-bold">Your favourites</h1>
           <p className="text-sm text-muted-foreground">
-            Saved journeys and stops we watch for disruptions.
+            Saved journeys, stops and places we watch for disruptions.
           </p>
         </div>
 
         <Tabs defaultValue="routes" className="w-full space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="routes">Routes</TabsTrigger>
             <TabsTrigger value="stops">Stops</TabsTrigger>
+            <TabsTrigger value="places">Places</TabsTrigger>
           </TabsList>
+
+        <TabsContent value="places" className="space-y-4">
+          <AddPlaceForm />
+          {places.length === 0 ? (
+            <EmptyState message="No saved places yet. Save the spots you travel to often." />
+          ) : (
+            places.map((place) => (
+              <Card key={place.id} className="border-border/70 shadow-soft">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-mint text-primary">
+                      <Star className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <CardTitle className="truncate text-base">{place.label}</CardTitle>
+                      <p className="truncate text-xs text-muted-foreground">{place.name}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive"
+                    onClick={() => deletePlace.mutate({ data: { id: place.id } })}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Remove
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+
 
 
         <TabsContent value="routes" className="space-y-4">
@@ -161,6 +220,63 @@ function FavoritesPage() {
     </MobileShell>
   );
 }
+
+function AddPlaceForm() {
+  const queryClient = useQueryClient();
+  const [label, setLabel] = useState("");
+  const [place, setPlace] = useState<PlaceResult | null>(null);
+
+  const create = useMutation({
+    mutationFn: useServerFn(createFavoritePlace),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorite-places"] });
+      setLabel("");
+      setPlace(null);
+      toast.success("Place saved");
+    },
+    onError: () => toast.error("Couldn't save that place"),
+  });
+
+  return (
+    <Card className="border-border/70 shadow-soft">
+      <CardContent className="space-y-3 p-4">
+        <Input
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          placeholder="Nickname (e.g. Gym, Mum's place)"
+        />
+        <PlaceSearch
+          id="favorite-place"
+          label="Location"
+          value={place}
+          onChange={setPlace}
+          placeholder="Search an address, landmark or stop"
+        />
+        <Button
+          className="w-full"
+          disabled={!label.trim() || !place || create.isPending}
+          onClick={() =>
+            place &&
+            create.mutate({
+              data: {
+                label: label.trim(),
+                name: place.name,
+                address: place.description,
+                lat: place.lat,
+                lng: place.lng,
+              },
+            })
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Save place
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+
 
 function EmptyState({ message }: { message: string }) {
   return (

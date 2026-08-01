@@ -164,6 +164,9 @@ function ProfilePage() {
                 <span className="rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-2.5 py-0.5 text-[11px]">
                   {cardLabel(cardType)}
                 </span>
+                <span className="rounded-full border border-primary-glow/40 bg-primary-glow/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary-glow">
+                  🏆 {profile?.points ?? 0} pts
+                </span>
               </div>
             </div>
           </CardHeader>
@@ -171,8 +174,9 @@ function ProfilePage() {
             <div className="grid grid-cols-3 gap-2 text-center">
               <Stat label="Saved routes" value={favRoutes?.length ?? 0} icon={<RouteIcon className="h-4 w-4" />} />
               <Stat label="Saved stops" value={favStops?.length ?? 0} icon={<Star className="h-4 w-4" />} />
-              <Stat label="Member since" value={memberSince} icon={<Sparkles className="h-4 w-4" />} />
+              <Stat label="Reports made" value={profile?.reports_count ?? 0} icon={<Sparkles className="h-4 w-4" />} />
             </div>
+
             {completeness < 4 && (
               <div className="mt-4 rounded-xl border border-primary-glow/25 bg-primary-glow/10 p-3">
                 <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-foreground/15">
