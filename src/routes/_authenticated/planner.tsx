@@ -250,8 +250,8 @@ function PlannerPage() {
         <Card className="border-border/70 shadow-soft">
           <CardContent className="space-y-5 pt-6">
             <div className="grid gap-4">
-              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
-              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
+              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} saved={savedOptions} />
+              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} saved={savedOptions} />
             </div>
 
             <div className="space-y-2">
