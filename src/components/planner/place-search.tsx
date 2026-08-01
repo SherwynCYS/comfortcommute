@@ -14,7 +14,7 @@ type Props = {
   saved?: PlaceResult[];
 };
 
-export function PlaceSearch({ id, label, value, onChange, placeholder }: Props) {
+export function PlaceSearch({ id, label, value, onChange, placeholder, saved = [] }: Props) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [open, setOpen] = useState(false);
