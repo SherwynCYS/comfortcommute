@@ -49,8 +49,9 @@ export const syncAlertsFromLta = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     // Network-wide alerts: every user receives every LTA service message,
     // regardless of whether the affected line is in their favourites.
-    const lta = await getTrainServiceAlerts();
-    const alerts = (lta as { value?: Array<{ Status: string; Line: string }> })?.value ?? [];
+    const { fetchTrainServiceAlerts } = await import("./lta.server");
+    const lta = await fetchTrainServiceAlerts();
+    const alerts = lta.value ?? [];
 
     const { data: existing } = await context.supabase
       .from("alerts")
