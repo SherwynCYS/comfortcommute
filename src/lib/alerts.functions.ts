@@ -75,7 +75,11 @@ export const syncAlertsFromLta = createServerFn({ method: "POST" })
       .filter((alert) => !seen.has(`${alert.title}::${alert.body}`));
 
     if (newAlerts.length > 0) {
-      const { error } = await context.supabase.from("alerts").insert(newAlerts);
+      // The authenticated client is intentionally unable to create alerts. After
+      // auth has established the recipient, use the server-only client for this
+      // trusted network-alert fan-out while keeping the user id non-spoofable.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin.from("alerts").insert(newAlerts);
       if (error) throw new Error(error.message);
     }
 

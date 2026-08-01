@@ -31,6 +31,7 @@ type Props = {
   buses: MapBus[];
   stops: MapStop[];
   incidents?: MapIncident[];
+  routeLine?: { lat: number; lng: number }[];
   onSelectStop?: (code: string) => void;
 };
 
@@ -68,7 +69,7 @@ function incidentIcon() {
   });
 }
 
-export default function LiveMap({ center, buses, stops, incidents = [], onSelectStop }: Props) {
+export default function LiveMap({ center, buses, stops, incidents = [], routeLine = [], onSelectStop }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -102,6 +103,14 @@ export default function LiveMap({ center, buses, stops, incidents = [], onSelect
     if (!layer) return;
     layer.clearLayers();
 
+    if (routeLine.length > 1) {
+      L.polyline(routeLine.map((point) => [point.lat, point.lng] as L.LatLngTuple), {
+        color: "var(--primary)",
+        weight: 5,
+        opacity: 0.75,
+      }).addTo(layer);
+    }
+
     for (const stop of stops) {
       L.marker([stop.lat, stop.lng], { icon: stopIcon(stop) })
         .bindTooltip(stop.name, { direction: "top" })
@@ -118,7 +127,7 @@ export default function LiveMap({ center, buses, stops, incidents = [], onSelect
     for (const bus of buses) {
       L.marker([bus.lat, bus.lng], { icon: busIcon(bus), zIndexOffset: 500 }).addTo(layer);
     }
-  }, [buses, stops, incidents, onSelectStop]);
+  }, [buses, stops, incidents, routeLine, onSelectStop]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

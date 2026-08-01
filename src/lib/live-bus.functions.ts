@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-export type { LiveBus, LiveService, NearbyStop } from "./live-bus.server";
+export type { BusJourney, BusJourneyStop, LiveBus, LiveService, NearbyStop } from "./live-bus.server";
 
 export const getNearbyStops = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -30,4 +30,16 @@ export const getStopLive = createServerFn({ method: "GET" })
     ]);
 
     return { stop, services, available: true };
+  });
+
+export const getBusJourney = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z.object({ serviceNo: z.string().min(1).max(10), stopCode: z.string().min(3).max(10) }).parse(input)
+  )
+  .handler(async ({ data }) => {
+    const apiKey = process.env.LTA_DATAMALL_API_KEY;
+    if (!apiKey) return [];
+    const { fetchBusJourney } = await import("./live-bus.server");
+    return fetchBusJourney(data.serviceNo, data.stopCode, apiKey);
   });
