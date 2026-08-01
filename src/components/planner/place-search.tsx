@@ -77,7 +77,39 @@ export function PlaceSearch({ id, label, value, onChange, placeholder, saved = [
 
         {open && (
           <div className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
-            {results.length === 0 && !isFetching && (
+            {query.trim().length === 0 && saved.length > 0 && (
+              <div className="mb-1 border-b pb-1">
+                <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Saved
+                </p>
+                {saved.map((place) => (
+                  <button
+                    key={`saved-${place.id}`}
+                    type="button"
+                    className="flex w-full items-start gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-accent"
+                    onClick={() => {
+                      onChange(place);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="mt-0.5 text-primary">
+                      {place.type === "rail" ? (
+                        <TrainFront className="h-4 w-4" />
+                      ) : place.type === "bus" ? (
+                        <Bus className="h-4 w-4" />
+                      ) : (
+                        <Star className="h-4 w-4" />
+                      )}
+                    </span>
+                    <span>
+                      <span className="block font-medium">{place.name}</span>
+                      <span className="block text-xs text-muted-foreground">{place.description}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {results.length === 0 && !isFetching && query.trim().length > 0 && (
               <p className="px-3 py-2 text-sm text-muted-foreground">No matching places</p>
             )}
             {results.map((place) => (
