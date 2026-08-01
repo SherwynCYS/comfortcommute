@@ -83,3 +83,35 @@ export const updateProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return updated;
   });
+
+const PermissionState = z.enum(["granted", "denied", "unsupported", "skipped"]);
+
+export const acceptTerms = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({
+        locationPermission: PermissionState,
+        notificationPermission: PermissionState,
+      })
+      .parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { data: updated, error } = await context.supabase
+      .from("profiles")
+      .upsert(
+        {
+          id: context.userId,
+          terms_accepted_at: new Date().toISOString(),
+          location_permission: data.locationPermission,
+          notification_permission: data.notificationPermission,
+        } as never,
+        { onConflict: "id" }
+      )
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return updated;
+  });
+
