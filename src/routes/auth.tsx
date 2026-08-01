@@ -45,6 +45,8 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
+
 
   useEffect(() => {
     let mounted = true;
