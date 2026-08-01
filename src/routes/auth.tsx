@@ -129,18 +129,30 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <Link to="/" className="mb-8 flex items-center gap-2 text-2xl font-bold text-foreground">
-        <Bus className="h-8 w-8 text-primary" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-hero p-4">
+      <div className="grid-lines pointer-events-none absolute inset-0 opacity-50" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-primary-glow/20 blur-3xl"
+      />
+
+      <Link
+        to="/"
+        className="relative mb-8 flex items-center gap-3 font-display text-2xl font-bold text-ink-foreground"
+      >
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-glow/15 ring-1 ring-primary-glow/40">
+          <Bus className="h-6 w-6 text-primary-glow" />
+        </span>
         ComfortCommute
       </Link>
 
-      <Card className="w-full max-w-md">
+      <Card className="relative w-full max-w-md border-border/60 shadow-lift">
         <CardHeader className="text-center">
-          <CardTitle>Welcome aboard</CardTitle>
+          <CardTitle className="text-xl">Welcome aboard</CardTitle>
           <CardDescription>Sign in to plan smarter commutes across Singapore.</CardDescription>
         </CardHeader>
         <CardContent>
+
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Sign in</TabsTrigger>
@@ -230,10 +242,22 @@ function AuthPage() {
           </Button>
 
           {message && (
-            <p className="mt-4 text-center text-sm text-muted-foreground">{message}</p>
+            <p className="mt-4 rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
+              {message}
+            </p>
           )}
+
+          <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground">
+            By continuing you agree that journey times, fares and crowd levels shown are estimates
+            only, and you accept our{" "}
+            <Link to="/legal" className="font-medium text-primary underline-offset-4 hover:underline">
+              terms, disclaimer and privacy notice
+            </Link>
+            .
+          </p>
         </CardContent>
       </Card>
     </div>
+
   );
 }

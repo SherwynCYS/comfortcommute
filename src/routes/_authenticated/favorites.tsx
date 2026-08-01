@@ -68,32 +68,41 @@ function FavoritesPage() {
 
   return (
     <MobileShell>
-      <div className="space-y-6 p-4">
-        <h2 className="text-xl font-semibold">Your favourites</h2>
+      <div className="space-y-5 p-4">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Your favourites</h1>
+          <p className="text-sm text-muted-foreground">
+            Saved journeys and stops we watch for disruptions.
+          </p>
+        </div>
 
-      <Tabs defaultValue="routes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="routes">Routes</TabsTrigger>
-          <TabsTrigger value="stops">Stops</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="routes" className="w-full space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="routes">Routes</TabsTrigger>
+            <TabsTrigger value="stops">Stops</TabsTrigger>
+          </TabsList>
+
 
         <TabsContent value="routes" className="space-y-4">
           {routes.length === 0 ? (
             <EmptyState message="No saved routes yet. Plan a journey and save it." />
           ) : (
             routes.map((route) => (
-              <Card key={route.id}>
+              <Card key={route.id} className="border-border/70 shadow-soft">
                 <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <CardTitle className="text-base">{route.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">
+                      <CardTitle className="text-base leading-snug">{route.name}</CardTitle>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {route.origin_name} → {route.destination_name}
                       </p>
                     </div>
-                    <Badge variant="outline">{route.priority}</Badge>
+                    <Badge variant="secondary" className="shrink-0 capitalize">
+                      {route.priority}
+                    </Badge>
                   </div>
                 </CardHeader>
+
                 <CardContent>
                   <Button
                     variant="ghost"
@@ -115,16 +124,19 @@ function FavoritesPage() {
             <EmptyState message="No saved stops yet." />
           ) : (
             stops.map((stop) => (
-              <Card key={stop.id}>
+              <Card key={stop.id} className="border-border/70 shadow-soft">
                 <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    {stop.transport_type === "bus" ? (
-                      <Bus className="h-5 w-5 text-primary" />
-                    ) : (
-                      <MapPin className="h-5 w-5 text-primary" />
-                    )}
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                      {stop.transport_type === "bus" ? (
+                        <Bus className="h-4 w-4" />
+                      ) : (
+                        <MapPin className="h-4 w-4" />
+                      )}
+                    </span>
                     <CardTitle className="text-base">{stop.stop_name}</CardTitle>
                   </div>
+
                   {stop.stop_code && (
                     <p className="text-xs text-muted-foreground">Code: {stop.stop_code}</p>
                   )}
@@ -152,9 +164,12 @@ function FavoritesPage() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
-      <Heart className="mb-4 h-10 w-10 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-mint text-primary">
+        <Heart className="h-6 w-6" />
+      </span>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
+
   );
 }

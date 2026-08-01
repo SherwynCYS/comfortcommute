@@ -2,6 +2,8 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { Bus, Heart, Bell, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { LegalFooter } from "@/components/layout/legal-footer";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/planner", label: "Plan", icon: Bus },
@@ -26,12 +28,23 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background pb-20">
-      <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur">
+    <div className="flex min-h-screen flex-col bg-background pb-24">
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl">
         <div className="mx-auto flex max-w-xl items-center justify-between">
-          <Link to="/planner" className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <Bus className="h-6 w-6 text-primary" />
+          <Link
+            to="/planner"
+            className="flex items-center gap-2.5 font-display text-base font-bold text-foreground"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground shadow-soft">
+              <Bus className="h-4 w-4" />
+            </span>
             ComfortCommute
+          </Link>
+          <Link
+            to="/legal"
+            className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Disclaimer
           </Link>
         </div>
       </header>
@@ -40,10 +53,19 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-xl">{children}</div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-xl justify-around py-2">
+      <div className="mx-auto w-full max-w-xl">
+        <LegalFooter compact />
+      </div>
+
+      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border/60 bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-xl justify-around px-2 py-1.5">
           {navItems.map((item) => (
-            <NavItem key={item.to} item={item} badge={item.to === "/alerts" ? unreadCount : 0} isActive={router.state.location.pathname === item.to} />
+            <NavItem
+              key={item.to}
+              item={item}
+              badge={item.to === "/alerts" ? unreadCount : 0}
+              isActive={router.state.location.pathname === item.to}
+            />
           ))}
         </div>
       </nav>
@@ -65,14 +87,17 @@ function NavItem({
   return (
     <Link
       to={item.to}
-      className={`relative flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-colors ${
-        isActive ? "text-primary" : "text-muted-foreground"
-      }`}
+      className={cn(
+        "relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-medium transition-all",
+        isActive
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:text-foreground",
+      )}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
       {item.label}
       {badge > 0 && (
-        <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
+        <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
           {badge}
         </span>
       )}

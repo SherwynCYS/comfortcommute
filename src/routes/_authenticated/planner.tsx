@@ -159,153 +159,207 @@ function PlannerPage() {
 
   return (
     <MobileShell>
-      <div className="space-y-6 p-4">
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Plan your journey</h2>
-
-        {(homePlace || workPlace) && (
-          <div className="flex flex-wrap gap-2">
-            {homePlace && workPlace && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setOrigin(homePlace);
-                  setDestination(workPlace);
-                }}
-              >
-                <Briefcase className="mr-2 h-4 w-4" />
-                Home → Work
-              </Button>
-            )}
-            {homePlace && workPlace && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setOrigin(workPlace);
-                  setDestination(homePlace);
-                }}
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Work → Home
-              </Button>
-            )}
-            {homePlace && (
-              <Button variant="outline" size="sm" onClick={() => setDestination(homePlace)}>
-                <Home className="mr-2 h-4 w-4" />
-                To home
-              </Button>
-            )}
-            {workPlace && (
-              <Button variant="outline" size="sm" onClick={() => setDestination(workPlace)}>
-                <Briefcase className="mr-2 h-4 w-4" />
-                To work
-              </Button>
-            )}
+      <div className="space-y-5 p-4">
+        <section className="overflow-hidden rounded-3xl bg-gradient-hero p-5 text-ink-foreground shadow-lift">
+          <div className="flex items-center gap-2 text-xs font-medium text-primary-glow">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-ranked journeys
           </div>
-        )}
+          <h1 className="mt-2 font-display text-2xl font-bold">Where to today?</h1>
+          <p className="mt-1 text-sm text-ink-foreground/70">
+            Live Singapore transit, scored for your priority.
+          </p>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
-          <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
-        </div>
-
-
-        <div className="space-y-2">
-          <Label>Priority</Label>
-          <RadioGroup
-            value={priority}
-            onValueChange={(v) => setPriority(v as RoutePriority)}
-            className="flex gap-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="time" id="time" />
-              <Label htmlFor="time">Fastest</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="balanced" id="balanced" />
-              <Label htmlFor="balanced">Balanced</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="comfort" id="comfort" />
-              <Label htmlFor="comfort">Comfort</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="price" id="price" />
-              <Label htmlFor="price">Cheapest</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Comfort filters</Label>
-          <div className="flex flex-wrap gap-3">
-            {[
-              { key: "seatAvailability", label: "Seat likely" },
-              { key: "fewerTransfers", label: "Fewer transfers" },
-              { key: "lessWalking", label: "Less walking" },
-              { key: "airConditioned", label: "Air-con" },
-              { key: "accessible", label: "Accessible" },
-              { key: "cheaperFare", label: "Lower fare" },
-            ].map((f) => (
-              <label
-                key={f.key}
-                className="flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-sm"
-              >
-                <Checkbox
-                  checked={filters[f.key as keyof RouteFilters]}
-                  onCheckedChange={() => toggleFilter(f.key as keyof RouteFilters)}
+          {(homePlace || workPlace) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {homePlace && workPlace && (
+                <QuickChip
+                  icon={Briefcase}
+                  label="Home → Work"
+                  onClick={() => {
+                    setOrigin(homePlace);
+                    setDestination(workPlace);
+                  }}
                 />
-                {f.label}
-              </label>
-            ))}
-          </div>
-        </div>
+              )}
+              {homePlace && workPlace && (
+                <QuickChip
+                  icon={Home}
+                  label="Work → Home"
+                  onClick={() => {
+                    setOrigin(workPlace);
+                    setDestination(homePlace);
+                  }}
+                />
+              )}
+              {homePlace && (
+                <QuickChip icon={Home} label="To home" onClick={() => setDestination(homePlace)} />
+              )}
+              {workPlace && (
+                <QuickChip
+                  icon={Briefcase}
+                  label="To work"
+                  onClick={() => setDestination(workPlace)}
+                />
+              )}
+            </div>
+          )}
+        </section>
 
-        <Button onClick={handlePlan} disabled={loading} className="w-full">
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-          Find best routes
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          Fares estimated for your {cardLabel(cardType).toLowerCase()} — change it in your profile.
-        </p>
-      </section>
+        <Card className="border-border/70 shadow-soft">
+          <CardContent className="space-y-5 pt-6">
+            <div className="grid gap-4">
+              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
+              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
+            </div>
 
-      {recommendation && (
-        <Card className="border-primary/50 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-5 w-5 text-primary" />
-              AI recommendation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{recommendation.explanation}</p>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Priority
+              </Label>
+              <RadioGroup
+                value={priority}
+                onValueChange={(v) => setPriority(v as RoutePriority)}
+                className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+              >
+                {[
+                  { value: "time", label: "Fastest" },
+                  { value: "balanced", label: "Balanced" },
+                  { value: "comfort", label: "Comfort" },
+                  { value: "price", label: "Cheapest" },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    htmlFor={option.value}
+                    className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
+                      priority === option.value
+                        ? "border-primary bg-accent text-accent-foreground"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    <RadioGroupItem value={option.value} id={option.value} className="sr-only" />
+                    {option.label}
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Comfort filters
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "seatAvailability", label: "Seat likely" },
+                  { key: "fewerTransfers", label: "Fewer transfers" },
+                  { key: "lessWalking", label: "Less walking" },
+                  { key: "airConditioned", label: "Air-con" },
+                  { key: "accessible", label: "Accessible" },
+                  { key: "cheaperFare", label: "Lower fare" },
+                ].map((f) => {
+                  const active = filters[f.key as keyof RouteFilters];
+                  return (
+                    <label
+                      key={f.key}
+                      className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                        active
+                          ? "border-primary bg-accent text-accent-foreground"
+                          : "border-border text-muted-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      <Checkbox
+                        checked={active}
+                        onCheckedChange={() => toggleFilter(f.key as keyof RouteFilters)}
+                      />
+                      {f.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Button onClick={handlePlan} disabled={loading} size="lg" className="w-full shadow-glow">
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Find best routes
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Fares estimated for your {cardLabel(cardType).toLowerCase()} — change it in your
+              profile. Estimates only, not a fare quotation.
+            </p>
           </CardContent>
         </Card>
-      )}
 
-      {routes.length > 0 && !routes.some((r) => r.steps.some((s) => s.mode === "bus")) && (
-        <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-          No bus options for this trip right now — live bus data is unavailable, so only train and
-          walking routes are shown.
-        </p>
-      )}
+        {recommendation && (
+          <Card className="border-primary/40 bg-gradient-mint shadow-soft">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                AI recommendation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-relaxed text-foreground/80">
+                {recommendation.explanation}
+              </p>
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                AI-generated suggestion — verify with official operator information before you
+                travel.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-      <section className="space-y-4">
+        {routes.length > 0 && !routes.some((r) => r.steps.some((s) => s.mode === "bus")) && (
+          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">
+            No bus options for this trip right now — live bus data is unavailable, so only train and
+            walking routes are shown.
+          </p>
+        )}
 
-        {routes.map((route) => (
-          <RouteCard
-            key={route.id}
-            route={route}
-            recommended={route.id === recommendation?.recommendedRouteId}
-            onSave={() => handleSave(route)}
-          />
-        ))}
-        </section>
+        {routes.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              {routes.length} option{routes.length === 1 ? "" : "s"}
+            </h2>
+            {routes.map((route) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                recommended={route.id === recommendation?.recommendedRouteId}
+                onSave={() => handleSave(route)}
+              />
+            ))}
+          </section>
+        )}
       </div>
     </MobileShell>
+  );
+}
+
+function QuickChip({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-3 py-1.5 text-xs font-medium text-ink-foreground transition-colors hover:bg-ink-foreground/20"
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
   );
 }
 
@@ -326,68 +380,72 @@ function RouteCard({
   onSave: () => void;
 }) {
   return (
-    <Card className={recommended ? "border-primary" : ""}>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+    <Card
+      className={
+        recommended
+          ? "border-primary/60 shadow-glow transition-shadow"
+          : "border-border/70 shadow-soft transition-shadow hover:shadow-lift"
+      }
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">{route.summary}</CardTitle>
-            <p className="text-xs text-muted-foreground">
+            <CardTitle className="text-base leading-snug">{route.summary}</CardTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
               {route.departureTime
                 ? `Depart ${formatTime(route.departureTime)}${route.arrivalTime ? ` · arrive ${formatTime(route.arrivalTime)}` : ""}`
                 : `Score: ${route.score}`}
             </p>
           </div>
-          {recommended && <Badge variant="default">Recommended</Badge>}
+          {recommended && <Badge className="shrink-0">Recommended</Badge>}
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            {route.totalTimeMinutes} min
-          </div>
-          <div className="flex items-center gap-1">
-            <Footprints className="h-4 w-4 text-muted-foreground" />
+        <div className="grid grid-cols-3 gap-2">
+          <MetricTile icon={Clock} value={`${route.totalTimeMinutes} min`} label="Travel" />
+          <MetricTile icon={Coins} value={formatFare(route.fareCents)} label="Est. fare" />
+          <MetricTile icon={Users} value={route.crowdLevel} label="Crowd" />
+        </div>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Footprints className="h-3.5 w-3.5" />
             {route.walkingDistanceMeters}m walk
-          </div>
-          <div className="flex items-center gap-1">
-            <Bus className="h-4 w-4 text-muted-foreground" />
-            {route.transfers} transfers
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            {route.crowdLevel} crowd
-          </div>
-          <div className="flex items-center gap-1 font-medium">
-            <Coins className="h-4 w-4 text-muted-foreground" />
-            {formatFare(route.fareCents)}
-          </div>
+          </span>
+          <span className="flex items-center gap-1">
+            <Bus className="h-3.5 w-3.5" />
+            {route.transfers} transfer{route.transfers === 1 ? "" : "s"}
+          </span>
         </div>
 
         <Separator />
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {route.steps.map((step, idx) => (
             <div key={idx} className="flex gap-3 text-sm">
-              <div className="mt-1">
-                {step.mode === "walk" ? (
-                  <Footprints className="h-4 w-4" />
-                ) : step.mode === "bus" ? (
-                  <Bus className="h-4 w-4" />
-                ) : (
-                  <MapPin className="h-4 w-4" />
-                )}
+              <div className="flex flex-col items-center">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+                  {step.mode === "walk" ? (
+                    <Footprints className="h-3.5 w-3.5" />
+                  ) : step.mode === "bus" ? (
+                    <Bus className="h-3.5 w-3.5" />
+                  ) : (
+                    <MapPin className="h-3.5 w-3.5" />
+                  )}
+                </span>
+                {idx < route.steps.length - 1 && <span className="mt-1 w-px flex-1 bg-border" />}
               </div>
-              <div>
+              <div className="pb-1">
                 <p className="font-medium">
                   {step.mode === "walk"
                     ? "Walk"
                     : step.mode === "bus"
                       ? `Bus ${step.serviceNo ?? ""}`.trim()
-                      : (step.line ?? "Train")} · {step.durationMinutes} min
+                      : (step.line ?? "Train")}{" "}
+                  · {step.durationMinutes} min
                 </p>
-                <p className="text-muted-foreground">{step.instruction}</p>
+                <p className="text-xs text-muted-foreground">{step.instruction}</p>
               </div>
             </div>
           ))}
@@ -401,3 +459,22 @@ function RouteCard({
     </Card>
   );
 }
+
+function MetricTile({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: React.ElementType;
+  value: string | number;
+  label: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/70 bg-muted/50 p-2.5 text-center">
+      <Icon className="mx-auto mb-1 h-4 w-4 text-primary" />
+      <p className="truncate text-sm font-semibold capitalize">{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
