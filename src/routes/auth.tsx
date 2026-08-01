@@ -242,10 +242,22 @@ function AuthPage() {
           </Button>
 
           {message && (
-            <p className="mt-4 text-center text-sm text-muted-foreground">{message}</p>
+            <p className="mt-4 rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
+              {message}
+            </p>
           )}
+
+          <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground">
+            By continuing you agree that journey times, fares and crowd levels shown are estimates
+            only, and you accept our{" "}
+            <Link to="/legal" className="font-medium text-primary underline-offset-4 hover:underline">
+              terms, disclaimer and privacy notice
+            </Link>
+            .
+          </p>
         </CardContent>
       </Card>
     </div>
+
   );
 }
