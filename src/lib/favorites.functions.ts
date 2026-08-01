@@ -51,7 +51,7 @@ export const createFavoriteRoute = createServerFn({ method: "POST" })
         destination_lat: data.destinationLat,
         destination_lng: data.destinationLng,
         priority: data.priority,
-        filters: data.filters,
+        filters: data.filters as Record<string, boolean>,
       })
       .select()
       .single();
