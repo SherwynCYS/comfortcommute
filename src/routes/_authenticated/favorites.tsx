@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,11 +10,19 @@ import {
   deleteFavoriteRoute,
   deleteFavoriteStop,
 } from "@/lib/favorites.functions";
+import {
+  listFavoritePlaces,
+  createFavoritePlace,
+  deleteFavoritePlace,
+} from "@/lib/favorite-places.functions";
+import { PlaceSearch } from "@/components/planner/place-search";
+import type { PlaceResult } from "@/lib/places.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Bus, MapPin, Trash2, Heart } from "lucide-react";
+import { Bus, MapPin, Trash2, Heart, Star, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/favorites")({
