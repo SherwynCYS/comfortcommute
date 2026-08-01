@@ -47,24 +47,21 @@ export const deleteAlert = createServerFn({ method: "POST" })
 export const syncAlertsFromLta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: favorites } = await context.supabase
-      .from("favorite_routes")
-      .select("destination_name, origin_name")
-      .eq("user_id", context.userId);
-
-    const routeNames = new Set(
-      (favorites ?? []).flatMap((f) => [f.origin_name, f.destination_name])
-    );
-
+    // Network-wide alerts: every user receives every LTA service message,
+    // regardless of whether the affected line is in their favourites.
     const lta = await getTrainServiceAlerts();
     const alerts = (lta as { value?: Array<{ Status: string; Line: string }> })?.value ?? [];
 
+    const { data: existing } = await context.supabase
+      .from("alerts")
+      .select("title, body")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    const seen = new Set((existing ?? []).map((a) => `${a.title}::${a.body}`));
+
     const newAlerts = alerts
-      .filter((alert) =>
-        Array.from(routeNames).some((name) =>
-          alert.Line.toLowerCase().includes(name.toLowerCase())
-        )
-      )
       .map((alert) => ({
         user_id: context.userId,
         title: `Service update: ${alert.Line}`,
@@ -73,7 +70,8 @@ export const syncAlertsFromLta = createServerFn({ method: "POST" })
           ? ("critical" as const)
           : ("warning" as const),
         affected_route_or_stop: alert.Line,
-      }));
+      }))
+      .filter((alert) => !seen.has(`${alert.title}::${alert.body}`));
 
     if (newAlerts.length > 0) {
       const { error } = await context.supabase.from("alerts").insert(newAlerts);
@@ -82,3 +80,4 @@ export const syncAlertsFromLta = createServerFn({ method: "POST" })
 
     return { inserted: newAlerts.length };
   });
+

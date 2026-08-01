@@ -245,9 +245,12 @@ export type Database = {
           home_lng: number | null
           home_name: string | null
           id: string
+          location_permission: string | null
+          notification_permission: string | null
           occupation: string
           points: number
           reports_count: number
+          terms_accepted_at: string | null
           updated_at: string
           work_lat: number | null
           work_lng: number | null
@@ -262,9 +265,12 @@ export type Database = {
           home_lng?: number | null
           home_name?: string | null
           id: string
+          location_permission?: string | null
+          notification_permission?: string | null
           occupation?: string
           points?: number
           reports_count?: number
+          terms_accepted_at?: string | null
           updated_at?: string
           work_lat?: number | null
           work_lng?: number | null
@@ -279,9 +285,12 @@ export type Database = {
           home_lng?: number | null
           home_name?: string | null
           id?: string
+          location_permission?: string | null
+          notification_permission?: string | null
           occupation?: string
           points?: number
           reports_count?: number
+          terms_accepted_at?: string | null
           updated_at?: string
           work_lat?: number | null
           work_lng?: number | null

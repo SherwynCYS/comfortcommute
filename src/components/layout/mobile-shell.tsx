@@ -3,7 +3,9 @@ import { Bus, Heart, Bell, User, Radio } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LegalFooter } from "@/components/layout/legal-footer";
+import { ConsentGate } from "@/components/onboarding/consent-gate";
 import { cn } from "@/lib/utils";
+
 
 const navItems = [
   { to: "/planner", label: "Plan", icon: Bus },
@@ -14,8 +16,17 @@ const navItems = [
 ];
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
+  return (
+    <ConsentGate>
+      <MobileShellInner>{children}</MobileShellInner>
+    </ConsentGate>
+  );
+}
+
+function MobileShellInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
+
 
   useEffect(() => {
     const fetchUnread = async () => {

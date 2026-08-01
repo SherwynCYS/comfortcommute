@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Bus, Loader2 } from "lucide-react";
 
 function safeNext(value: unknown): string | undefined {
@@ -44,6 +45,8 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
+
 
   useEffect(() => {
     let mounted = true;
@@ -212,7 +215,7 @@ function AuthPage() {
               <Button
                 className="w-full"
                 onClick={() => handleEmailAuth("login")}
-                disabled={loading}
+                disabled={loading || !agreed}
               >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Sign in
@@ -242,7 +245,7 @@ function AuthPage() {
               <Button
                 className="w-full"
                 onClick={() => handleEmailAuth("signup")}
-                disabled={loading}
+                disabled={loading || !agreed}
               >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Create account
@@ -256,7 +259,7 @@ function AuthPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
+          <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={loading || !agreed}>
             Continue with Google
           </Button>
 
@@ -266,14 +269,23 @@ function AuthPage() {
             </p>
           )}
 
-          <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground">
-            By continuing you agree that journey times, fares and crowd levels shown are estimates
-            only, and you accept our{" "}
-            <Link to="/legal" className="font-medium text-primary underline-offset-4 hover:underline">
-              terms, disclaimer and privacy notice
-            </Link>
-            .
-          </p>
+          <label className="mt-6 flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3 text-[11px] leading-relaxed text-muted-foreground">
+            <Checkbox
+              checked={agreed}
+              onCheckedChange={(v) => setAgreed(v === true)}
+              className="mt-0.5"
+              aria-label="Accept terms and conditions"
+            />
+            <span>
+              I agree that journey times, fares and crowd levels shown are estimates only, and I
+              accept the{" "}
+              <Link to="/legal" className="font-medium text-primary underline-offset-4 hover:underline">
+                terms, disclaimer and privacy notice
+              </Link>
+              .
+            </span>
+          </label>
+
         </CardContent>
       </Card>
     </div>
