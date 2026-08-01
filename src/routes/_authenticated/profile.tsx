@@ -287,6 +287,8 @@ function ProfilePage() {
           </CardContent>
         </Card>
 
+        <AppearanceSettings />
+
         <Separator />
 
         <p className="rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed text-muted-foreground">
