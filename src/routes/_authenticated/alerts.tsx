@@ -149,9 +149,12 @@ function SeverityBadge({ severity }: { severity: string }) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
-      <Bell className="mb-4 h-10 w-10 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-mint text-primary">
+        <Bell className="h-6 w-6" />
+      </span>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
+
   );
 }
