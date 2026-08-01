@@ -285,6 +285,15 @@ function ProfilePage() {
 
         <Separator />
 
+        <p className="rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed text-muted-foreground">
+          Your saved places and profile are used only to personalise planning and fare estimates,
+          and are visible only to your account. We never sell your data.{" "}
+          <Link to="/legal" className="font-medium text-primary underline-offset-4 hover:underline">
+            Read the privacy notice
+          </Link>
+          .
+        </p>
+
         <Button variant="outline" className="w-full text-destructive" onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
@@ -296,10 +305,11 @@ function ProfilePage() {
 
 function Stat({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
   return (
-    <div className="rounded-lg border bg-background/60 p-3">
-      <div className="mb-1 flex justify-center text-muted-foreground">{icon}</div>
+    <div className="rounded-xl border border-ink-foreground/15 bg-ink-foreground/10 p-3">
+      <div className="mb-1 flex justify-center text-primary-glow">{icon}</div>
       <p className="text-sm font-semibold">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-[11px] text-ink-foreground/60">{label}</p>
     </div>
+
   );
 }
