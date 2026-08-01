@@ -145,19 +145,25 @@ function ProfilePage() {
 
   return (
     <MobileShell>
-      <div className="space-y-6 p-4">
-        <Card className="overflow-hidden border-primary/40 bg-gradient-to-br from-primary/10 to-transparent">
+      <div className="space-y-5 p-4">
+        <Card className="overflow-hidden border-0 bg-gradient-hero text-ink-foreground shadow-lift">
           <CardHeader className="flex-row items-center gap-4 space-y-0">
-            <Avatar className="h-16 w-16">
+            <Avatar className="h-16 w-16 ring-2 ring-primary-glow/40">
               <AvatarImage src={profile?.avatar_url ?? undefined} />
-              <AvatarFallback>{initials || <User className="h-6 w-6" />}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {initials || <User className="h-6 w-6" />}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm text-muted-foreground">{greeting()},</p>
+              <p className="text-sm text-ink-foreground/60">{greeting()},</p>
               <CardTitle className="text-xl">{displayName || "Commuter"}</CardTitle>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Badge variant="secondary">{occupationLabel(occupation)}</Badge>
-                <Badge variant="outline">{cardLabel(cardType)}</Badge>
+                <span className="rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-2.5 py-0.5 text-[11px]">
+                  {occupationLabel(occupation)}
+                </span>
+                <span className="rounded-full border border-ink-foreground/20 bg-ink-foreground/10 px-2.5 py-0.5 text-[11px]">
+                  {cardLabel(cardType)}
+                </span>
               </div>
             </div>
           </CardHeader>
@@ -168,13 +174,22 @@ function ProfilePage() {
               <Stat label="Member since" value={memberSince} icon={<Sparkles className="h-4 w-4" />} />
             </div>
             {completeness < 4 && (
-              <p className="mt-4 text-xs text-muted-foreground">
-                Profile {completeness}/4 complete — add your home, work and fare card so we can price and rank
-                every journey for you.
-              </p>
+              <div className="mt-4 rounded-xl border border-primary-glow/25 bg-primary-glow/10 p-3">
+                <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-foreground/15">
+                  <div
+                    className="h-full rounded-full bg-primary-glow transition-all"
+                    style={{ width: `${(completeness / 4) * 100}%` }}
+                  />
+                </div>
+                <p className="text-xs text-ink-foreground/75">
+                  Profile {completeness}/4 complete — add your home, work and fare card so we can
+                  price and rank every journey for you.
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
+
 
         <Card>
           <CardHeader>
