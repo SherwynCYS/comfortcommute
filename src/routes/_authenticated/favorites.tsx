@@ -221,6 +221,63 @@ function FavoritesPage() {
   );
 }
 
+function AddPlaceForm() {
+  const queryClient = useQueryClient();
+  const [label, setLabel] = useState("");
+  const [place, setPlace] = useState<PlaceResult | null>(null);
+
+  const create = useMutation({
+    mutationFn: useServerFn(createFavoritePlace),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorite-places"] });
+      setLabel("");
+      setPlace(null);
+      toast.success("Place saved");
+    },
+    onError: () => toast.error("Couldn't save that place"),
+  });
+
+  return (
+    <Card className="border-border/70 shadow-soft">
+      <CardContent className="space-y-3 p-4">
+        <Input
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          placeholder="Nickname (e.g. Gym, Mum's place)"
+        />
+        <PlaceSearch
+          id="favorite-place"
+          label="Location"
+          value={place}
+          onChange={setPlace}
+          placeholder="Search an address, landmark or stop"
+        />
+        <Button
+          className="w-full"
+          disabled={!label.trim() || !place || create.isPending}
+          onClick={() =>
+            place &&
+            create.mutate({
+              data: {
+                label: label.trim(),
+                name: place.name,
+                address: place.description,
+                lat: place.lat,
+                lng: place.lng,
+              },
+            })
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Save place
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
