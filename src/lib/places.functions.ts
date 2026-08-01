@@ -27,8 +27,15 @@ export const searchPlaces = createServerFn({ method: "GET" })
 
     const transit = searchPlaceList([...railPlaces, ...busStops], data.query, data.limit);
 
-    // Addresses/places first (Google Maps style), then matching stations and stops.
-    const merged = [...addresses, ...transit];
+    const q = data.query.trim().toLowerCase();
+    const transitIntent = /^\d{3,5}$/.test(q) || /\b(mrt|lrt|bus|stop|station|interchange)\b/.test(q);
+
+    // Bus stops and stations are transit objects, not generic "places": surface
+    // the strongest transit matches first, then geocoded addresses.
+    const merged = transitIntent
+      ? [...transit, ...addresses]
+      : [...transit.slice(0, 4), ...addresses, ...transit.slice(4)];
+
     const seen = new Set<string>();
     return merged.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))).slice(0, data.limit);
   });

@@ -96,6 +96,8 @@ type PhotonFeature = {
     country?: string;
     countrycode?: string;
     type?: string;
+    osm_key?: string;
+    osm_value?: string;
   };
 };
 
@@ -147,6 +149,14 @@ export async function searchAddresses(query: string, limit: number): Promise<Pla
         if (typeof lat !== "number" || typeof lng !== "number") return null;
         if (!inSingapore(lat, lng)) return null;
 
+        // Transit stops come from the authoritative LTA / rail datasets, not the
+        // geocoder — otherwise a bus stop shows up as a generic "place".
+        const key = props.osm_key ?? "";
+        const value = props.osm_value ?? "";
+        if (key === "railway" || key === "public_transport") return null;
+        if (key === "highway" && (value === "bus_stop" || value === "platform")) return null;
+        if (value === "bus_station" || value === "bus_stop" || value === "station") return null;
+
         const name = props.name ?? [props.housenumber, props.street].filter(Boolean).join(" ");
         if (!name) return null;
 
@@ -165,25 +175,48 @@ export async function searchAddresses(query: string, limit: number): Promise<Pla
   }
 }
 
-function scoreMatch(place: Place, query: string): number {
-  const haystack = `${place.name} ${place.description}`.toLowerCase();
-  const idx = haystack.indexOf(query);
-  if (idx === -1) return -1;
+function normalise(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+}
 
-  let score = 100 - idx;
-  if (place.name.toLowerCase().startsWith(query)) score += 50;
-  if (place.type === "rail") score += 25;
+function scoreMatch(place: Place, tokens: string[], rawQuery: string): number {
+  const name = normalise(place.name);
+  const haystack = `${name} ${normalise(place.description)}`;
+
+  // Bus stop codes: "43009" should hit that exact stop first.
+  if (/^\d{4,5}$/.test(rawQuery) && place.type === "bus") {
+    const code = place.id.replace("bus-", "");
+    if (code === rawQuery) return 1000;
+    if (code.startsWith(rawQuery)) return 700;
+  }
+
+  let score = 0;
+  for (const token of tokens) {
+    if (name.startsWith(token)) score += 60;
+    else if (name.split(" ").some((word) => word.startsWith(token))) score += 45;
+    else if (name.includes(token)) score += 25;
+    else if (haystack.includes(token)) score += 10;
+    else return -1; // every token must match somewhere
+  }
+
+  if (name === normalise(rawQuery)) score += 200;
+  if (name.startsWith(normalise(rawQuery))) score += 80;
+  if (place.type === "rail") score += 20;
   return score;
 }
 
 export function searchPlaceList(places: Place[], rawQuery: string, limit: number): Place[] {
-  const query = rawQuery.trim().toLowerCase();
+  const query = normalise(rawQuery);
   if (!query) return places.filter((p) => p.type === "rail").slice(0, limit);
 
+  const tokens = query.split(" ").filter((t) => t.length > 0 && t !== "mrt" && t !== "station" && t !== "stop");
+  const effective = tokens.length > 0 ? tokens : [query];
+
   return places
-    .map((place) => ({ place, score: scoreMatch(place, query) }))
+    .map((place) => ({ place, score: scoreMatch(place, effective, query) }))
     .filter((entry) => entry.score >= 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score || a.place.name.length - b.place.name.length)
     .slice(0, limit)
     .map((entry) => entry.place);
 }
+

@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/layout/mobile-shell";
 import { planRoute, type CommuteRoute, type RouteFilters, type RoutePriority } from "@/lib/routes.functions";
 import { recommendRoute, type AiRecommendation } from "@/lib/ai.functions";
-import { createFavoriteRoute } from "@/lib/favorites.functions";
+import { createFavoriteRoute, listFavoriteStops } from "@/lib/favorites.functions";
+import { listFavoritePlaces } from "@/lib/favorite-places.functions";
 import { PlaceSearch } from "@/components/planner/place-search";
 import type { PlaceResult } from "@/lib/places.functions";
 import { getProfile } from "@/lib/profile.functions";
@@ -86,6 +87,46 @@ function PlannerPage() {
 
   const homePlace = savedPlace("home");
   const workPlace = savedPlace("work");
+
+  const listPlacesFn = useServerFn(listFavoritePlaces);
+  const listStopsFn = useServerFn(listFavoriteStops);
+
+  const { data: favPlaces = [] } = useQuery({
+    queryKey: ["favorite-places"],
+    queryFn: () => listPlacesFn({ data: undefined }),
+  });
+  const { data: favStops = [] } = useQuery({
+    queryKey: ["favorite-stops"],
+    queryFn: () => listStopsFn({ data: undefined }),
+  });
+
+  const savedOptions: PlaceResult[] = [
+    ...(homePlace ? [homePlace] : []),
+    ...(workPlace ? [workPlace] : []),
+    ...favPlaces
+      .filter((p) => p.lat != null && p.lng != null)
+      .map((p) => ({
+        id: `fav-place-${p.id}`,
+        name: p.name,
+        description: p.label || p.address || "Saved place",
+        lat: p.lat as number,
+        lng: p.lng as number,
+        type: "address" as const,
+      })),
+    ...favStops
+      .filter((s) => s.stop_lat != null && s.stop_lng != null)
+      .map((s) => ({
+        id: `fav-stop-${s.id}`,
+        name: s.stop_name,
+        description:
+          s.transport_type === "bus"
+            ? `Bus stop${s.stop_code ? ` ${s.stop_code}` : ""}`
+            : "MRT/LRT station",
+        lat: s.stop_lat as number,
+        lng: s.stop_lng as number,
+        type: (s.transport_type === "bus" ? "bus" : "rail") as "bus" | "rail",
+      })),
+  ];
   const recommendFn = useServerFn(recommendRoute);
   const saveRouteFn = useServerFn(createFavoriteRoute);
 
@@ -209,8 +250,8 @@ function PlannerPage() {
         <Card className="border-border/70 shadow-soft">
           <CardContent className="space-y-5 pt-6">
             <div className="grid gap-4">
-              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} />
-              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} />
+              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} saved={savedOptions} />
+              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} saved={savedOptions} />
             </div>
 
             <div className="space-y-2">
