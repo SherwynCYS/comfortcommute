@@ -87,6 +87,46 @@ function PlannerPage() {
 
   const homePlace = savedPlace("home");
   const workPlace = savedPlace("work");
+
+  const listPlacesFn = useServerFn(listFavoritePlaces);
+  const listStopsFn = useServerFn(listFavoriteStops);
+
+  const { data: favPlaces = [] } = useQuery({
+    queryKey: ["favorite-places"],
+    queryFn: () => listPlacesFn({ data: undefined }),
+  });
+  const { data: favStops = [] } = useQuery({
+    queryKey: ["favorite-stops"],
+    queryFn: () => listStopsFn({ data: undefined }),
+  });
+
+  const savedOptions: PlaceResult[] = [
+    ...(homePlace ? [homePlace] : []),
+    ...(workPlace ? [workPlace] : []),
+    ...favPlaces
+      .filter((p) => p.lat != null && p.lng != null)
+      .map((p) => ({
+        id: `fav-place-${p.id}`,
+        name: p.name,
+        description: p.label || p.address || "Saved place",
+        lat: p.lat as number,
+        lng: p.lng as number,
+        type: "address" as const,
+      })),
+    ...favStops
+      .filter((s) => s.stop_lat != null && s.stop_lng != null)
+      .map((s) => ({
+        id: `fav-stop-${s.id}`,
+        name: s.stop_name,
+        description:
+          s.transport_type === "bus"
+            ? `Bus stop${s.stop_code ? ` ${s.stop_code}` : ""}`
+            : "MRT/LRT station",
+        lat: s.stop_lat as number,
+        lng: s.stop_lng as number,
+        type: (s.transport_type === "bus" ? "bus" : "rail") as "bus" | "rail",
+      })),
+  ];
   const recommendFn = useServerFn(recommendRoute);
   const saveRouteFn = useServerFn(createFavoriteRoute);
 
