@@ -59,31 +59,38 @@ function AlertsPage() {
 
   return (
     <MobileShell>
-      <div className="space-y-6 p-4">
-        <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Alerts</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => sync.mutate({ data: undefined })}
-          disabled={sync.isPending}
-        >
-          {sync.isPending ? (
-            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-2 h-4 w-4" />
-          )}
-          Sync
-        </Button>
-      </div>
+      <div className="space-y-5 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-bold">Alerts</h1>
+            <p className="text-sm text-muted-foreground">
+              Disruptions touching your saved journeys.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => sync.mutate({ data: undefined })}
+            disabled={sync.isPending}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${sync.isPending ? "animate-spin" : ""}`} />
+            Sync
+          </Button>
+        </div>
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading alerts…</p>
-      ) : alerts.length === 0 ? (
-        <EmptyState message="No alerts yet. Sync to check for incidents affecting your favourites." />
-      ) : (
-        alerts.map((alert) => (
-          <Card key={alert.id} className={alert.is_read ? "opacity-70" : ""}>
+        <p className="rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed text-muted-foreground">
+          Alerts are derived from LTA train service messages and may be delayed or incomplete. They
+          are not an official notification channel — always check the operator for confirmation.
+        </p>
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading alerts…</p>
+        ) : alerts.length === 0 ? (
+          <EmptyState message="No alerts yet. Sync to check for incidents affecting your favourites." />
+        ) : (
+          alerts.map((alert) => (
+            <Card key={alert.id} className={alert.is_read ? "opacity-70 shadow-soft" : "shadow-soft"}>
+
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
