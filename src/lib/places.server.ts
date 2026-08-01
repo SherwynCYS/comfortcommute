@@ -96,6 +96,8 @@ type PhotonFeature = {
     country?: string;
     countrycode?: string;
     type?: string;
+    osm_key?: string;
+    osm_value?: string;
   };
 };
 
