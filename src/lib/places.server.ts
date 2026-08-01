@@ -149,6 +149,14 @@ export async function searchAddresses(query: string, limit: number): Promise<Pla
         if (typeof lat !== "number" || typeof lng !== "number") return null;
         if (!inSingapore(lat, lng)) return null;
 
+        // Transit stops come from the authoritative LTA / rail datasets, not the
+        // geocoder — otherwise a bus stop shows up as a generic "place".
+        const key = props.osm_key ?? "";
+        const value = props.osm_value ?? "";
+        if (key === "railway" || key === "public_transport") return null;
+        if (key === "highway" && (value === "bus_stop" || value === "platform")) return null;
+        if (value === "bus_station" || value === "bus_stop" || value === "station") return null;
+
         const name = props.name ?? [props.housenumber, props.street].filter(Boolean).join(" ");
         if (!name) return null;
 
