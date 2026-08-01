@@ -16,7 +16,6 @@ const navItems = [
 ];
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
-export function MobileShell({ children }: { children: React.ReactNode }) {
   return (
     <ConsentGate>
       <MobileShellInner>{children}</MobileShellInner>
