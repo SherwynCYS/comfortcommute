@@ -16,8 +16,18 @@ const navItems = [
 ];
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
+export function MobileShell({ children }: { children: React.ReactNode }) {
+  return (
+    <ConsentGate>
+      <MobileShellInner>{children}</MobileShellInner>
+    </ConsentGate>
+  );
+}
+
+function MobileShellInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
+
 
   useEffect(() => {
     const fetchUnread = async () => {
