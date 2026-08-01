@@ -11,6 +11,7 @@ type Props = {
   value: PlaceResult | null;
   onChange: (place: PlaceResult | null) => void;
   placeholder?: string;
+  saved?: PlaceResult[];
 };
 
 export function PlaceSearch({ id, label, value, onChange, placeholder }: Props) {
