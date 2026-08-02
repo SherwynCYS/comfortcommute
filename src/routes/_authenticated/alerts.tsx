@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, BellOff, Check, CheckCheck, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 
 function timeAgo(date: Date) {
   const secs = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/_authenticated/alerts")({
 });
 
 function AlertsPage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const listAlertsFn = useServerFn(listAlerts);
   const [lastSync, setLastSync] = useState<Date | null>(null);

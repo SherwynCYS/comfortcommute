@@ -45,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/planner")({
 });
 
 function PlannerPage() {
+  const { t } = useI18n();
   const [origin, setOrigin] = useState<PlaceResult | null>(null);
   const [destination, setDestination] = useState<PlaceResult | null>(null);
   const [priority, setPriority] = useState<RoutePriority>("balanced");
