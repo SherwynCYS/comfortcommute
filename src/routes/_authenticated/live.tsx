@@ -37,12 +37,16 @@ import {
   TriangleAlert,
   Volume2,
   Accessibility,
+  TrainFront,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { InfoButton } from "@/components/ui/info-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/lib/i18n";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
+const MrtMap = lazy(() => import("@/components/map/mrt-map"));
 
 const SG_CENTRE = { lat: 1.3521, lng: 103.8198 };
 
@@ -95,6 +99,7 @@ export const Route = createFileRoute("/_authenticated/live")({
 });
 
 function LivePage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [activeStop, setActiveStop] = useState<string | null>(null);
@@ -308,7 +313,7 @@ function LivePage() {
           <div className="flex items-center gap-2.5">
             <Volume2 className="h-4 w-4 text-primary" />
             <Label htmlFor="voice" className="text-sm">
-              Speak alerts when a bus is 2 min away
+              {t("speakAlerts")}
             </Label>
           </div>
           <Switch id="voice" checked={voiceOn} onCheckedChange={setVoiceOn} />
@@ -316,7 +321,7 @@ function LivePage() {
 
         <div className="flex items-center justify-between">
           <h2 className="font-display text-base font-semibold">
-            {stopInfo?.name ?? "Arrivals"}{" "}
+            {stopInfo?.name ?? t("arrivals")}{" "}
             {activeStop && <span className="text-xs text-muted-foreground">#{activeStop}</span>}
           </h2>
           <div className="flex gap-1">
@@ -349,7 +354,7 @@ function LivePage() {
         <div className="space-y-2.5">
           {services.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              No services reporting at this stop right now.
+              {t("noServices")}
             </p>
           ) : (
             services.map((service) => (
@@ -492,7 +497,7 @@ function CommunityFeed({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-base font-semibold">Commuter reports</h2>
+        <h2 className="font-display text-base font-semibold">{t("commuterReports")}</h2>
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button size="sm" className="gap-1.5">
