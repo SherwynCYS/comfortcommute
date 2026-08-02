@@ -107,9 +107,9 @@ function AlertsPage() {
       <div className="space-y-5 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Alerts</h1>
+            <h1 className="font-display text-2xl font-bold">{t("alerts")}</h1>
             <p className="text-sm text-muted-foreground">
-              Live LTA service messages across the whole network.
+              {t("alertsSubtitle")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {sync.isPending
@@ -129,7 +129,7 @@ function AlertsPage() {
             disabled={sync.isPending}
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${sync.isPending ? "animate-spin" : ""}`} />
-            Refresh
+            {t("refresh")}
           </Button>
         </div>
 
@@ -139,12 +139,12 @@ function AlertsPage() {
             size="sm"
             onClick={() => setShowUnreadOnly((v) => !v)}
           >
-            {showUnreadOnly ? "Showing unread" : `Unread (${unread.length})`}
+            {showUnreadOnly ? t("showingUnread") : `${t("unread")} (${unread.length})`}
           </Button>
           {unread.length > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllRead}>
               <CheckCheck className="mr-2 h-4 w-4" />
-              Mark all read
+              {t("markAllRead")}
             </Button>
           )}
         </div>
@@ -155,7 +155,7 @@ function AlertsPage() {
         </p>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading alerts…</p>
+          <p className="text-sm text-muted-foreground">{t("loadingAlerts")}</p>
         ) : visible.length === 0 ? (
           <EmptyState
             message={
