@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { InfoButton } from "@/components/ui/info-button";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
 
@@ -234,7 +235,7 @@ function LivePage() {
       <div className="space-y-4 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Live near you</h1>
+            <div className="flex items-center gap-1"><h1 className="font-display text-2xl font-bold">Live near you</h1><InfoButton label="How the live map works">Bus labels show the service number and arrival time. The coloured dot shows reported crowding; tap a stop on the map to change arrivals.</InfoButton></div>
             <p className="text-sm text-muted-foreground">
               Buses move on the map as they drive. Countdowns refresh every 20 seconds.
             </p>

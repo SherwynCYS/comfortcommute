@@ -9,12 +9,12 @@ export const LOCALES: { value: Locale; label: string; short: string }[] = [
   { value: "ta", label: "தமிழ்", short: "த" },
 ];
 
-const messages = {
+const messages: Record<Locale, Record<string, string>> = {
   en: { plan: "Plan", live: "Live", saved: "Saved", alerts: "Alerts", profile: "Profile", disclaimer: "Disclaimer", language: "Language" },
   zh: { plan: "规划", live: "实时", saved: "收藏", alerts: "通知", profile: "个人", disclaimer: "免责声明", language: "语言" },
   ms: { plan: "Rancang", live: "Langsung", saved: "Disimpan", alerts: "Amaran", profile: "Profil", disclaimer: "Penafian", language: "Bahasa" },
   ta: { plan: "திட்டம்", live: "நேரலை", saved: "சேமிப்பு", alerts: "எச்சரிக்கை", profile: "சுயவிவரம்", disclaimer: "பொறுப்புத்துறப்பு", language: "மொழி" },
-} satisfies Record<Locale, Record<string, string>>;
+};
 
 type I18nValue = { locale: Locale; setLocale: (locale: Locale) => void; t: (key: string) => string };
 const I18nContext = createContext<I18nValue | null>(null);
