@@ -279,14 +279,17 @@ export async function buildGoogleTransitRoutes(
     computeTransitRoutes(origin, destination, undefined, lovableApiKey, mapsApiKey, ["SUBWAY", "TRAIN", "LIGHT_RAIL", "RAIL"]).catch(() => []),
   ]);
 
-  const built = [...balanced, ...lessWalking, ...fewerTransfers, ...busFocused, ...railFocused]
-    .map((route, index) => toCommuteRoute(route, index, origin, destination))
+  const batches = [balanced, lessWalking, fewerTransfers, busFocused, railFocused];
+  const built = batches
+    .flatMap((batch) => batch.map((route, baselineRank) => ({ route, baselineRank })))
+    .map(({ route, baselineRank }) => toCommuteRoute(route, baselineRank, origin, destination))
     .filter((entry): entry is { route: CommuteRoute; boardings: BusBoarding[] } => entry !== null);
 
   // Remove exact duplicates while retaining different boarding and timing options.
   const seen = new Set<string>();
   const unique = built.filter(({ route }) => {
-    const key = `${route.summary}|${route.totalTimeMinutes}|${route.departureTime ?? ""}|${route.walkingDistanceMeters}`;
+    const journey = route.steps.map((step) => `${step.mode}:${step.from}:${step.to}`).join("|");
+    const key = `${journey}|${route.totalTimeMinutes}|${route.departureTime ?? ""}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
