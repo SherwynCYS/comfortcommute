@@ -465,6 +465,7 @@ function CommunityFeed({
   stopCode: string | null;
   stopPosition: { lat: number; lng: number } | null;
 }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<string>("crowding");
