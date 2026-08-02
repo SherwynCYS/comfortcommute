@@ -35,14 +35,17 @@ type Props = {
   onSelectStop?: (code: string) => void;
 };
 
+const BUS_GLYPH = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6v6M15 6v6M2 12h19.6M18 18h.01M6 18h.01"/><path d="M4 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>`;
+
 function busIcon(bus: MapBus) {
   const loadClass = bus.load === "LSD" ? "is-crowded" : bus.load === "SDA" ? "is-standing" : "is-seated";
   return L.divIcon({
     className: "cc-map-marker",
-    html: `<div class="cc-bus-marker ${loadClass}"><span class="cc-bus-icon">BUS</span><strong>${bus.serviceNo}</strong>${bus.etaMinutes !== null ? `<span>${bus.etaMinutes <= 0 ? "Arr" : `${bus.etaMinutes}m`}</span>` : ""}</div>`,
+    html: `<div class="cc-bus-marker ${loadClass}"><span class="cc-bus-icon">${BUS_GLYPH}</span><strong>${bus.serviceNo}</strong>${bus.etaMinutes !== null ? `<span class="cc-bus-eta">${bus.etaMinutes <= 0 ? "Arr" : `${bus.etaMinutes}m`}</span>` : ""}</div>`,
     iconSize: [0, 0],
   });
 }
+
 
 function stopIcon(stop: MapStop) {
   const size = stop.active ? 16 : 11;
