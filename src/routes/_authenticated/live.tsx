@@ -128,7 +128,10 @@ function LivePage() {
   const { data: stops = [] } = useQuery({
     queryKey: ["nearby-stops", position?.lat, position?.lng],
     enabled: Boolean(position),
-    queryFn: () => nearbyFn({ data: { lat: position!.lat, lng: position!.lng, limit: 8 } }),
+    queryFn: () => {
+      if (!position) return [];
+      return nearbyFn({ data: { lat: position.lat, lng: position.lng, limit: 8 } });
+    },
   });
 
   useEffect(() => {
@@ -139,7 +142,10 @@ function LivePage() {
     queryKey: ["stop-live", activeStop],
     enabled: Boolean(activeStop),
     refetchInterval: 20000,
-    queryFn: () => stopLiveFn({ data: { code: activeStop! } }),
+    queryFn: () => {
+      if (!activeStop) throw new Error("Select a stop first");
+      return stopLiveFn({ data: { code: activeStop } });
+    },
   });
 
   const { data: reports = [] } = useQuery({
@@ -185,14 +191,17 @@ function LivePage() {
       services.flatMap((service) =>
         service.buses
           .filter((bus) => bus.lat !== null && bus.lng !== null)
-          .map((bus) => ({
-            id: `${service.serviceNo}-${bus.order}`,
-            serviceNo: service.serviceNo,
-            lat: bus.lat!,
-            lng: bus.lng!,
-            etaMinutes: bus.etaMinutes,
-            load: bus.load,
-          }))
+          .flatMap((bus) => {
+            if (bus.lat === null || bus.lng === null) return [];
+            return [{
+              id: `${service.serviceNo}-${bus.order}`,
+              serviceNo: service.serviceNo,
+              lat: bus.lat,
+              lng: bus.lng,
+              etaMinutes: bus.etaMinutes,
+              load: bus.load,
+            }];
+          })
       ),
     [services]
   );
