@@ -35,16 +35,11 @@ type Props = {
   onSelectStop?: (code: string) => void;
 };
 
-const loadColor = (load: string | null) =>
-  load === "LSD" ? "var(--destructive)" : load === "SDA" ? "#d97706" : "var(--primary)";
-
 function busIcon(bus: MapBus) {
+  const loadClass = bus.load === "LSD" ? "is-crowded" : bus.load === "SDA" ? "is-standing" : "is-seated";
   return L.divIcon({
-    className: "",
-    html: `<div style="display:flex;align-items:center;gap:4px;transform:translate(-50%,-50%);
-      background:${loadColor(bus.load)};color:#fff;font:600 11px/1 'DM Sans',system-ui;
-      padding:5px 8px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.28);white-space:nowrap">
-      🚌 ${bus.serviceNo}${bus.etaMinutes !== null ? ` · ${bus.etaMinutes}m` : ""}</div>`,
+    className: "cc-map-marker",
+    html: `<div class="cc-bus-marker ${loadClass}"><span class="cc-bus-icon">BUS</span><strong>${bus.serviceNo}</strong>${bus.etaMinutes !== null ? `<span>${bus.etaMinutes <= 0 ? "Arr" : `${bus.etaMinutes}m`}</span>` : ""}</div>`,
     iconSize: [0, 0],
   });
 }
@@ -129,5 +124,14 @@ export default function LiveMap({ center, buses, stops, incidents = [], routeLin
     }
   }, [buses, stops, incidents, routeLine, onSelectStop]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      <div className="pointer-events-none absolute left-3 top-3 z-[500] flex gap-1 rounded-md border border-border bg-background/95 p-1.5 text-[10px] font-semibold text-foreground shadow-soft backdrop-blur">
+        <span className="rounded bg-success px-1.5 py-1 text-success-foreground">Seats</span>
+        <span className="rounded bg-warning px-1.5 py-1 text-warning-foreground">Standing</span>
+        <span className="rounded bg-destructive px-1.5 py-1 text-destructive-foreground">Crowded</span>
+      </div>
+    </div>
+  );
 }

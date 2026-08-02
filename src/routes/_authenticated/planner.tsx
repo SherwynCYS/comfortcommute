@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Briefcase, Bus, Clock, Coins, Footprints, Heart, Home, Loader2, MapPin, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
+import { InfoButton } from "@/components/ui/info-button";
 
 export const Route = createFileRoute("/_authenticated/planner")({
   ssr: false,
@@ -255,9 +256,10 @@ function PlannerPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                Priority
-              </Label>
+              <div className="flex items-center gap-1">
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Priority</Label>
+                <InfoButton label="How route priorities work">Fastest prioritises total journey time. Comfort favours lower crowding and better seat chances. Balanced weighs both, while Cheapest emphasises estimated fare.</InfoButton>
+              </div>
               <RadioGroup
                 value={priority}
                 onValueChange={(v) => setPriority(v as RoutePriority)}
@@ -286,9 +288,10 @@ function PlannerPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                Comfort filters
-              </Label>
+              <div className="flex items-center gap-1">
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Comfort filters</Label>
+                <InfoButton label="About comfort estimates">Seat and crowd estimates use live operator data when available. They can change before you board.</InfoButton>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {[
                   { key: "seatAvailability", label: "Seat likely" },
@@ -341,7 +344,7 @@ function PlannerPage() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Sparkles className="h-4 w-4" />
                 </span>
-                AI recommendation
+                Best match
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -349,8 +352,7 @@ function PlannerPage() {
                 {recommendation.explanation}
               </p>
               <p className="mt-3 text-[11px] text-muted-foreground">
-                AI-generated suggestion — verify with official operator information before you
-                travel.
+                Ranked from live timetable, walking, transfers, fare and comfort data. The AI explains the result but does not replace the route score.
               </p>
             </CardContent>
           </Card>

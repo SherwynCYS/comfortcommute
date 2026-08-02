@@ -41,10 +41,11 @@ export function rankRoutes(
   const bestWalk = Math.min(...routes.map((r) => r.walkingDistanceMeters));
   const bestFare = Math.min(...routes.map((r) => r.fareCents));
   const w = WEIGHTS[priority];
+  const timeTolerance = priority === "time" ? 8 : priority === "balanced" ? 12 : 18;
 
   const scored = routes.map((route) => {
     let score =
-      w.time * relative(route.totalTimeMinutes, bestTime, 8) +
+      w.time * relative(route.totalTimeMinutes, bestTime, timeTolerance) +
       w.transfers * relative(route.transfers, bestTransfers, 1) +
       w.walk * relative(route.walkingDistanceMeters, bestWalk, 600) +
       w.fare * relative(route.fareCents, bestFare, 50) +

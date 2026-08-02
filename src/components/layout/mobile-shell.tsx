@@ -1,11 +1,14 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Bus, Heart, Bell, User, Radio, Sun, Moon, Monitor } from "lucide-react";
+import { Bus, Heart, Bell, User, Radio, Sun, Moon, Monitor, Languages } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LegalFooter } from "@/components/layout/legal-footer";
 import { ConsentGate } from "@/components/onboarding/consent-gate";
 import { cn } from "@/lib/utils";
 import { useTheme, type ThemeMode } from "@/lib/theme";
+import { LOCALES, useI18n } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 
 const navItems = [
@@ -26,6 +29,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
 function MobileShellInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
 
 
@@ -54,12 +58,13 @@ function MobileShellInner({ children }: { children: React.ReactNode }) {
             ComfortCommute
           </Link>
           <div className="flex items-center gap-1.5">
-            <ThemeToggle />
+             <LanguageMenu />
+             <ThemeToggle />
             <Link
               to="/legal"
               className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-primary"
             >
-              Disclaimer
+               {t("disclaimer")}
             </Link>
           </div>
         </div>
@@ -78,7 +83,7 @@ function MobileShellInner({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => (
             <NavItem
               key={item.to}
-              item={item}
+               item={{ ...item, label: t(item.label.toLowerCase()) }}
               badge={item.to === "/alerts" ? unreadCount : 0}
               isActive={router.state.location.pathname === item.to}
             />
@@ -86,6 +91,26 @@ function MobileShellInner({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
     </div>
+  );
+}
+
+function LanguageMenu() {
+  const { locale, setLocale, t } = useI18n();
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={t("language")} title={t("language")}>
+          <Languages className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-48 p-1.5">
+        {LOCALES.map((option) => (
+          <Button key={option.value} variant={locale === option.value ? "secondary" : "ghost"} className="w-full justify-start" onClick={() => setLocale(option.value)}>
+            <span className="w-8 text-xs font-bold">{option.short}</span>{option.label}
+          </Button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }
 

@@ -96,7 +96,8 @@ async function computeTransitRoutes(
   destination: Point,
   routingPreference: "LESS_WALKING" | "FEWER_TRANSFERS" | undefined,
   lovableApiKey: string,
-  mapsApiKey: string
+  mapsApiKey: string,
+  allowedTravelModes: string[] = ["BUS", "SUBWAY", "TRAIN", "LIGHT_RAIL", "RAIL"]
 ): Promise<GRoute[]> {
   const response = await fetch(`${GATEWAY_URL}/routes/directions/v2:computeRoutes`, {
     method: "POST",
@@ -119,7 +120,7 @@ async function computeTransitRoutes(
       regionCode: "SG",
       units: "METRIC",
       transitPreferences: {
-        allowedTravelModes: ["BUS", "SUBWAY", "TRAIN", "LIGHT_RAIL", "RAIL"],
+        allowedTravelModes,
         ...(routingPreference ? { routingPreference } : {}),
       },
     }),
@@ -268,22 +269,27 @@ export async function buildGoogleTransitRoutes(
   const mapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!lovableApiKey || !mapsApiKey) return [];
 
-  const [balanced, lessWalking, fewerTransfers] = await Promise.all([
+  const [balanced, lessWalking, fewerTransfers, busFocused, railFocused] = await Promise.all([
     computeTransitRoutes(origin, destination, undefined, lovableApiKey, mapsApiKey),
     computeTransitRoutes(origin, destination, "LESS_WALKING", lovableApiKey, mapsApiKey).catch(() => []),
     computeTransitRoutes(origin, destination, "FEWER_TRANSFERS", lovableApiKey, mapsApiKey).catch(
       () => []
     ),
+    computeTransitRoutes(origin, destination, undefined, lovableApiKey, mapsApiKey, ["BUS"]).catch(() => []),
+    computeTransitRoutes(origin, destination, undefined, lovableApiKey, mapsApiKey, ["SUBWAY", "TRAIN", "LIGHT_RAIL", "RAIL"]).catch(() => []),
   ]);
 
-  const built = [...balanced, ...lessWalking, ...fewerTransfers]
-    .map((route, index) => toCommuteRoute(route, index, origin, destination))
+  const batches = [balanced, lessWalking, fewerTransfers, busFocused, railFocused];
+  const built = batches
+    .flatMap((batch) => batch.map((route, baselineRank) => ({ route, baselineRank })))
+    .map(({ route, baselineRank }) => toCommuteRoute(route, baselineRank, origin, destination))
     .filter((entry): entry is { route: CommuteRoute; boardings: BusBoarding[] } => entry !== null);
 
-  // De-duplicate itineraries that use the same services for the same duration.
+  // Remove exact duplicates while retaining different boarding and timing options.
   const seen = new Set<string>();
   const unique = built.filter(({ route }) => {
-    const key = `${route.summary}|${route.totalTimeMinutes}`;
+    const journey = route.steps.map((step) => `${step.mode}:${step.from}:${step.to}`).join("|");
+    const key = `${journey}|${route.totalTimeMinutes}|${route.departureTime ?? ""}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

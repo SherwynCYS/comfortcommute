@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Bus, ChevronRight, LocateFixed, Map, MapPin, RefreshCw, Trash2, Heart, Star, Plus, TrainFront } from "lucide-react";
 import { toast } from "sonner";
+import { InfoButton } from "@/components/ui/info-button";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
 const MrtMap = lazy(() => import("@/components/map/mrt-map"));
@@ -203,7 +204,7 @@ function FavoritesPage() {
 
         <TabsContent value="map" className="space-y-3">
           <div>
-            <h2 className="font-display text-lg font-semibold">Singapore rail network</h2>
+            <div className="flex items-center gap-1"><h2 className="font-display text-lg font-semibold">Singapore rail network</h2><InfoButton label="About the rail map">This is the official LTA system map, so station order, interchanges and line connections match the network diagram used across Singapore.</InfoButton></div>
             <p className="text-sm text-muted-foreground">Pinch, pan and tap any station to see its line codes.</p>
           </div>
           <div className="h-[60vh] min-h-96 overflow-hidden rounded-xl border border-border/70 shadow-soft">

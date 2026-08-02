@@ -279,12 +279,12 @@ export async function buildCandidateRoutes(
   origin: Point,
   destination: Point
 ): Promise<CommuteRoute[]> {
-  // Google Routes is the baseline itinerary source (real timetables and transfers);
-  // the local heuristic engine below is the fallback when it is unavailable.
+  // Google is the timetable-aware baseline. Merge direct live bus options below
+  // so nearby services are not hidden by a rail-heavy generic transit response.
+  let googleRoutes: CommuteRoute[] = [];
   try {
     const { buildGoogleTransitRoutes } = await import("./google-routes.server");
-    const googleRoutes = await buildGoogleTransitRoutes(origin, destination);
-    if (googleRoutes.length > 0) return googleRoutes;
+    googleRoutes = await buildGoogleTransitRoutes(origin, destination);
   } catch (error) {
     console.error("Google Routes baseline failed, falling back to local engine:", error);
   }
@@ -292,13 +292,15 @@ export async function buildCandidateRoutes(
   const apiKey = process.env.LTA_DATAMALL_API_KEY;
   const directMeters = haversineDistance(origin.lat, origin.lng, destination.lat, destination.lng);
 
-  const candidates: CommuteRoute[] = [];
+  const candidates: CommuteRoute[] = [...googleRoutes];
 
 
   if (directMeters <= 1200) candidates.push(walkOnlyRoute(origin, destination));
 
-  const rail = buildRailRoute(origin, destination);
-  if (rail) candidates.push(rail);
+  if (googleRoutes.length === 0) {
+    const rail = buildRailRoute(origin, destination);
+    if (rail) candidates.push(rail);
+  }
 
   if (apiKey) {
     const [buses, busRail] = await Promise.all([
@@ -306,7 +308,7 @@ export async function buildCandidateRoutes(
       buildBusRailRoute(origin, destination, apiKey).catch(() => null),
     ]);
     candidates.push(...buses);
-    if (busRail) candidates.push(busRail);
+    if (busRail && googleRoutes.length === 0) candidates.push(busRail);
   }
 
   if (candidates.length === 0) candidates.push(walkOnlyRoute(origin, destination));

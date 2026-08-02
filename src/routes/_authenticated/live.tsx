@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { InfoButton } from "@/components/ui/info-button";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
 
@@ -127,7 +128,10 @@ function LivePage() {
   const { data: stops = [] } = useQuery({
     queryKey: ["nearby-stops", position?.lat, position?.lng],
     enabled: Boolean(position),
-    queryFn: () => nearbyFn({ data: { lat: position!.lat, lng: position!.lng, limit: 8 } }),
+    queryFn: () => {
+      if (!position) return [];
+      return nearbyFn({ data: { lat: position.lat, lng: position.lng, limit: 8 } });
+    },
   });
 
   useEffect(() => {
@@ -138,7 +142,10 @@ function LivePage() {
     queryKey: ["stop-live", activeStop],
     enabled: Boolean(activeStop),
     refetchInterval: 20000,
-    queryFn: () => stopLiveFn({ data: { code: activeStop! } }),
+    queryFn: () => {
+      if (!activeStop) throw new Error("Select a stop first");
+      return stopLiveFn({ data: { code: activeStop } });
+    },
   });
 
   const { data: reports = [] } = useQuery({
@@ -184,14 +191,17 @@ function LivePage() {
       services.flatMap((service) =>
         service.buses
           .filter((bus) => bus.lat !== null && bus.lng !== null)
-          .map((bus) => ({
-            id: `${service.serviceNo}-${bus.order}`,
-            serviceNo: service.serviceNo,
-            lat: bus.lat!,
-            lng: bus.lng!,
-            etaMinutes: bus.etaMinutes,
-            load: bus.load,
-          }))
+          .flatMap((bus) => {
+            if (bus.lat === null || bus.lng === null) return [];
+            return [{
+              id: `${service.serviceNo}-${bus.order}`,
+              serviceNo: service.serviceNo,
+              lat: bus.lat,
+              lng: bus.lng,
+              etaMinutes: bus.etaMinutes,
+              load: bus.load,
+            }];
+          })
       ),
     [services]
   );
@@ -234,7 +244,7 @@ function LivePage() {
       <div className="space-y-4 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Live near you</h1>
+            <div className="flex items-center gap-1"><h1 className="font-display text-2xl font-bold">Live near you</h1><InfoButton label="How the live map works">Bus labels show the service number and arrival time. The coloured dot shows reported crowding; tap a stop on the map to change arrivals.</InfoButton></div>
             <p className="text-sm text-muted-foreground">
               Buses move on the map as they drive. Countdowns refresh every 20 seconds.
             </p>
