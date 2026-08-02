@@ -227,29 +227,31 @@
   align-items: center;
   background: var(--map-label);
   border: 2px solid var(--background);
-  border-radius: 6px;
-  box-shadow: 0 3px 12px oklch(0 0 0 / 0.42);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px oklch(0 0 0 / 0.45);
   color: var(--map-label-foreground);
   display: flex;
   font: 700 12px/1 var(--font-sans);
   gap: 5px;
-  padding: 5px 7px;
+  padding: 5px 9px 5px 5px;
   transform: translate(-50%, -50%);
   white-space: nowrap;
 }
 
-.cc-bus-marker::before {
+.cc-bus-marker .cc-bus-icon {
+  align-items: center;
   border-radius: 999px;
-  content: "";
-  height: 8px;
-  width: 8px;
+  display: inline-flex;
+  height: 20px;
+  justify-content: center;
+  width: 20px;
 }
 
-.cc-bus-marker.is-seated::before { background: var(--success); }
-.cc-bus-marker.is-standing::before { background: var(--warning); }
-.cc-bus-marker.is-crowded::before { background: var(--destructive); }
-.cc-bus-marker span { font-size: 10px; opacity: 0.9; }
-.cc-bus-icon { letter-spacing: 0; }
+.cc-bus-marker.is-seated .cc-bus-icon { background: var(--success); color: var(--success-foreground); }
+.cc-bus-marker.is-standing .cc-bus-icon { background: var(--warning); color: var(--warning-foreground); }
+.cc-bus-marker.is-crowded .cc-bus-icon { background: var(--destructive); color: var(--destructive-foreground); }
+.cc-bus-marker .cc-bus-eta { font-size: 10px; opacity: 0.85; }
+
 
 .leaflet-tooltip {
   background: var(--map-label);

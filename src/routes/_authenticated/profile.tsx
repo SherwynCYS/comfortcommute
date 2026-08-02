@@ -5,6 +5,7 @@ import { getProfile, updateProfile } from "@/lib/profile.functions";
 import { listFavoriteRoutes, listFavoriteStops } from "@/lib/favorites.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/layout/mobile-shell";
+import { useI18n } from "@/lib/i18n";
 import { PlaceSearch } from "@/components/planner/place-search";
 import { AppearanceSettings } from "@/components/settings/appearance-settings";
 import type { PlaceResult } from "@/lib/places.functions";
@@ -54,6 +55,7 @@ function greeting() {
 }
 
 function ProfilePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState("");
@@ -206,8 +208,8 @@ function ProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PlaceSearch id="home" label="Home" value={home} onChange={setHome} placeholder="Search your home address" />
-            <PlaceSearch id="work" label="Work / school" value={work} onChange={setWork} placeholder="Search your workplace" />
+            <PlaceSearch id="home" label={t("home")} value={home} onChange={setHome} placeholder="Search your home address" />
+            <PlaceSearch id="work" label={t("workSchool")} value={work} onChange={setWork} placeholder="Search your workplace" />
             <div className="flex gap-2">
               <Button className="flex-1" onClick={savePlaces} disabled={update.isPending}>
                 Save places

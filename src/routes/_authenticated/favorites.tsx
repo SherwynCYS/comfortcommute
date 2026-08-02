@@ -29,9 +29,9 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Bus, ChevronRight, LocateFixed, Map, MapPin, RefreshCw, Trash2, Heart, Star, Plus, TrainFront } from "lucide-react";
 import { toast } from "sonner";
 import { InfoButton } from "@/components/ui/info-button";
+import { useI18n } from "@/lib/i18n";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
-const MrtMap = lazy(() => import("@/components/map/mrt-map"));
 
 export const Route = createFileRoute("/_authenticated/favorites")({
   ssr: false,
@@ -53,6 +53,7 @@ export const Route = createFileRoute("/_authenticated/favorites")({
 });
 
 function FavoritesPage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const listRoutesFn = useServerFn(listFavoriteRoutes);
   const listStopsFn = useServerFn(listFavoriteStops);
@@ -101,18 +102,17 @@ function FavoritesPage() {
     <MobileShell>
       <div className="space-y-5 p-4">
         <div>
-          <h1 className="font-display text-2xl font-bold">Your favourites</h1>
+          <h1 className="font-display text-2xl font-bold">{t("favTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            Saved journeys, stops and places we watch for disruptions.
+            {t("favSubtitle")}
           </p>
         </div>
 
         <Tabs defaultValue="routes" className="w-full space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="routes">Routes</TabsTrigger>
-            <TabsTrigger value="stops">Stops</TabsTrigger>
-            <TabsTrigger value="places">Places</TabsTrigger>
-            <TabsTrigger value="map">MRT map</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="routes">{t("routes")}</TabsTrigger>
+            <TabsTrigger value="stops">{t("stops")}</TabsTrigger>
+            <TabsTrigger value="places">{t("places")}</TabsTrigger>
           </TabsList>
 
         <TabsContent value="places" className="space-y-4">
@@ -202,19 +202,6 @@ function FavoritesPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="map" className="space-y-3">
-          <div>
-            <div className="flex items-center gap-1"><h2 className="font-display text-lg font-semibold">Singapore rail network</h2><InfoButton label="About the rail map">This is the official LTA system map, so station order, interchanges and line connections match the network diagram used across Singapore.</InfoButton></div>
-            <p className="text-sm text-muted-foreground">Pinch, pan and tap any station to see its line codes.</p>
-          </div>
-          <div className="h-[60vh] min-h-96 overflow-hidden rounded-xl border border-border/70 shadow-soft">
-            <ClientOnly fallback={<MapFallback />}>
-              <Suspense fallback={<MapFallback />}>
-                <MrtMap />
-              </Suspense>
-            </ClientOnly>
-          </div>
-        </TabsContent>
       </Tabs>
       </div>
     </MobileShell>

@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Briefcase, Bus, Clock, Coins, Footprints, Heart, Home, Loader2, MapPin, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 import { InfoButton } from "@/components/ui/info-button";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/planner")({
   ssr: false,
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/planner")({
 });
 
 function PlannerPage() {
+  const { t } = useI18n();
   const [origin, setOrigin] = useState<PlaceResult | null>(null);
   const [destination, setDestination] = useState<PlaceResult | null>(null);
   const [priority, setPriority] = useState<RoutePriority>("balanced");
@@ -205,11 +207,11 @@ function PlannerPage() {
         <section className="overflow-hidden rounded-3xl bg-gradient-hero p-5 text-ink-foreground shadow-lift">
           <div className="flex items-center gap-2 text-xs font-medium text-primary-glow">
             <Sparkles className="h-3.5 w-3.5" />
-            AI-ranked journeys
+            {t("aiRanked")}
           </div>
-          <h1 className="mt-2 font-display text-2xl font-bold">Where to today?</h1>
+          <h1 className="mt-2 font-display text-2xl font-bold">{t("whereTo")}</h1>
           <p className="mt-1 text-sm text-ink-foreground/70">
-            Live Singapore transit, scored for your priority.
+            {t("plannerSubtitle")}
           </p>
 
           {(homePlace || workPlace) && (
@@ -217,7 +219,7 @@ function PlannerPage() {
               {homePlace && workPlace && (
                 <QuickChip
                   icon={Briefcase}
-                  label="Home → Work"
+                  label={t("homeToWork")}
                   onClick={() => {
                     setOrigin(homePlace);
                     setDestination(workPlace);
@@ -227,7 +229,7 @@ function PlannerPage() {
               {homePlace && workPlace && (
                 <QuickChip
                   icon={Home}
-                  label="Work → Home"
+                  label={t("workToHome")}
                   onClick={() => {
                     setOrigin(workPlace);
                     setDestination(homePlace);
@@ -235,12 +237,12 @@ function PlannerPage() {
                 />
               )}
               {homePlace && (
-                <QuickChip icon={Home} label="To home" onClick={() => setDestination(homePlace)} />
+                <QuickChip icon={Home} label={t("toHome")} onClick={() => setDestination(homePlace)} />
               )}
               {workPlace && (
                 <QuickChip
                   icon={Briefcase}
-                  label="To work"
+                  label={t("toWork")}
                   onClick={() => setDestination(workPlace)}
                 />
               )}
@@ -251,13 +253,13 @@ function PlannerPage() {
         <Card className="border-border/70 shadow-soft">
           <CardContent className="space-y-5 pt-6">
             <div className="grid gap-4">
-              <PlaceSearch id="origin" label="From" value={origin} onChange={setOrigin} saved={savedOptions} />
-              <PlaceSearch id="destination" label="To" value={destination} onChange={setDestination} saved={savedOptions} />
+              <PlaceSearch id="origin" label={t("from")} value={origin} onChange={setOrigin} saved={savedOptions} />
+              <PlaceSearch id="destination" label={t("to")} value={destination} onChange={setDestination} saved={savedOptions} />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-1">
-                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Priority</Label>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">{t("priority")}</Label>
                 <InfoButton label="How route priorities work">Fastest prioritises total journey time. Comfort favours lower crowding and better seat chances. Balanced weighs both, while Cheapest emphasises estimated fare.</InfoButton>
               </div>
               <RadioGroup
@@ -266,10 +268,10 @@ function PlannerPage() {
                 className="grid grid-cols-2 gap-2 sm:grid-cols-4"
               >
                 {[
-                  { value: "time", label: "Fastest" },
-                  { value: "balanced", label: "Balanced" },
-                  { value: "comfort", label: "Comfort" },
-                  { value: "price", label: "Cheapest" },
+                  { value: "time", label: t("fastest") },
+                  { value: "balanced", label: t("balanced") },
+                  { value: "comfort", label: t("comfort") },
+                  { value: "price", label: t("cheapest") },
                 ].map((option) => (
                   <label
                     key={option.value}
@@ -289,17 +291,17 @@ function PlannerPage() {
 
             <div className="space-y-2">
               <div className="flex items-center gap-1">
-                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Comfort filters</Label>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">{t("comfortFilters")}</Label>
                 <InfoButton label="About comfort estimates">Seat and crowd estimates use live operator data when available. They can change before you board.</InfoButton>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: "seatAvailability", label: "Seat likely" },
-                  { key: "fewerTransfers", label: "Fewer transfers" },
-                  { key: "lessWalking", label: "Less walking" },
-                  { key: "airConditioned", label: "Air-con" },
-                  { key: "accessible", label: "Accessible" },
-                  { key: "cheaperFare", label: "Lower fare" },
+                  { key: "seatAvailability", label: t("seatLikely") },
+                  { key: "fewerTransfers", label: t("fewerTransfers") },
+                  { key: "lessWalking", label: t("lessWalking") },
+                  { key: "airConditioned", label: t("aircon") },
+                  { key: "accessible", label: t("accessible") },
+                  { key: "cheaperFare", label: t("lowerFare") },
                 ].map((f) => {
                   const active = filters[f.key as keyof RouteFilters];
                   return (
@@ -328,7 +330,7 @@ function PlannerPage() {
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Find best routes
+              {t("findRoutes")}
             </Button>
             <p className="text-xs text-muted-foreground">
               Fares estimated for your {cardLabel(cardType).toLowerCase()} — change it in your

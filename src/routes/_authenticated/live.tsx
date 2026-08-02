@@ -37,12 +37,16 @@ import {
   TriangleAlert,
   Volume2,
   Accessibility,
+  TrainFront,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { InfoButton } from "@/components/ui/info-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/lib/i18n";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
+const MrtMap = lazy(() => import("@/components/map/mrt-map"));
 
 const SG_CENTRE = { lat: 1.3521, lng: 103.8198 };
 
@@ -95,6 +99,7 @@ export const Route = createFileRoute("/_authenticated/live")({
 });
 
 function LivePage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [activeStop, setActiveStop] = useState<string | null>(null);
@@ -244,17 +249,25 @@ function LivePage() {
       <div className="space-y-4 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-1"><h1 className="font-display text-2xl font-bold">Live near you</h1><InfoButton label="How the live map works">Bus labels show the service number and arrival time. The coloured dot shows reported crowding; tap a stop on the map to change arrivals.</InfoButton></div>
+            <div className="flex items-center gap-1"><h1 className="font-display text-2xl font-bold">{t("liveTitle")}</h1><InfoButton label="How the live map works">Bus labels show the service number and arrival time. The coloured dot behind the bus symbol shows how crowded it is: green means seats, amber means standing, red means very crowded. Tap a stop on the map to change arrivals.</InfoButton></div>
             <p className="text-sm text-muted-foreground">
-              Buses move on the map as they drive. Countdowns refresh every 20 seconds.
+              {t("liveSubtitle")}
             </p>
           </div>
-          <Button variant="outline" size="icon" onClick={locate} aria-label="Recentre on my location">
+          <Button variant="outline" size="icon" onClick={locate} aria-label={t("recentre")} title={t("recentre")}>
             <LocateFixed className="h-4 w-4" />
           </Button>
         </div>
 
+        <Tabs defaultValue="bus" className="w-full space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="bus" className="gap-1.5"><Bus className="h-4 w-4" />{t("busesTab")}</TabsTrigger>
+            <TabsTrigger value="mrt" className="gap-1.5"><TrainFront className="h-4 w-4" />{t("mrtTab")}</TabsTrigger>
+          </TabsList>
+
+        <TabsContent value="bus" className="space-y-4">
         <div className="relative h-72 overflow-hidden rounded-2xl border border-border/70 shadow-soft">
+
           <ClientOnly fallback={<MapSkeleton />}>
             <Suspense fallback={<MapSkeleton />}>
               <LiveMap
@@ -300,7 +313,7 @@ function LivePage() {
           <div className="flex items-center gap-2.5">
             <Volume2 className="h-4 w-4 text-primary" />
             <Label htmlFor="voice" className="text-sm">
-              Speak alerts when a bus is 2 min away
+              {t("speakAlerts")}
             </Label>
           </div>
           <Switch id="voice" checked={voiceOn} onCheckedChange={setVoiceOn} />
@@ -308,7 +321,7 @@ function LivePage() {
 
         <div className="flex items-center justify-between">
           <h2 className="font-display text-base font-semibold">
-            {stopInfo?.name ?? "Arrivals"}{" "}
+            {stopInfo?.name ?? t("arrivals")}{" "}
             {activeStop && <span className="text-xs text-muted-foreground">#{activeStop}</span>}
           </h2>
           <div className="flex gap-1">
@@ -341,7 +354,7 @@ function LivePage() {
         <div className="space-y-2.5">
           {services.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              No services reporting at this stop right now.
+              {t("noServices")}
             </p>
           ) : (
             services.map((service) => (
@@ -391,6 +404,31 @@ function LivePage() {
           stopCode={activeStop}
           stopPosition={stopInfo ? { lat: stopInfo.lat, lng: stopInfo.lng } : position}
         />
+        </TabsContent>
+
+        <TabsContent value="mrt" className="space-y-3">
+          <div>
+            <div className="flex items-center gap-1">
+              <h2 className="font-display text-lg font-semibold">{t("railTitle")}</h2>
+              <InfoButton label="About the rail map">
+                This is the official LTA system map, so station order, interchanges and line
+                connections match the network diagram used across Singapore. Drag with one finger to
+                move around, pinch or use the + / − buttons to zoom, and tap the reset button to fit
+                the whole map again.
+              </InfoButton>
+            </div>
+            <p className="text-sm text-muted-foreground">{t("railSubtitle")}</p>
+          </div>
+          <div className="h-[62vh] min-h-96 overflow-hidden rounded-2xl border border-border/70 shadow-soft">
+            <ClientOnly fallback={<MapSkeleton />}>
+              <Suspense fallback={<MapSkeleton />}>
+                <MrtMap />
+              </Suspense>
+            </ClientOnly>
+          </div>
+        </TabsContent>
+        </Tabs>
+
 
         <p className="pb-2 text-center text-[11px] leading-relaxed text-muted-foreground">
           Bus positions and arrival times come from LTA DataMall and can be delayed or missing.
@@ -427,6 +465,7 @@ function CommunityFeed({
   stopCode: string | null;
   stopPosition: { lat: number; lng: number } | null;
 }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<string>("crowding");
@@ -459,7 +498,7 @@ function CommunityFeed({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-base font-semibold">Commuter reports</h2>
+        <h2 className="font-display text-base font-semibold">{t("commuterReports")}</h2>
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button size="sm" className="gap-1.5">
