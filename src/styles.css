@@ -43,6 +43,8 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-map-label: var(--map-label);
+  --color-map-label-foreground: var(--map-label-foreground);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
   --color-surface: var(--surface);
@@ -96,6 +98,8 @@
   --success-foreground: oklch(0.985 0.005 185);
   --warning: oklch(0.752 0.145 74);
   --warning-foreground: oklch(0.24 0.04 74);
+  --map-label: oklch(0.2 0.025 255);
+  --map-label-foreground: oklch(0.99 0 0);
 
   --ink: oklch(0.201 0.032 258);
   --ink-foreground: oklch(0.965 0.008 185);
@@ -157,6 +161,8 @@
   --success-foreground: oklch(0.181 0.028 258);
   --warning: oklch(0.812 0.135 78);
   --warning-foreground: oklch(0.181 0.028 258);
+  --map-label: oklch(0.96 0.01 190);
+  --map-label-foreground: oklch(0.16 0.025 255);
 
   --ink: oklch(0.145 0.024 258);
   --ink-foreground: oklch(0.965 0.008 185);
@@ -208,8 +214,49 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
+}
+
+.cc-map-marker {
+  background: transparent;
+  border: 0;
+}
+
+.cc-bus-marker {
+  align-items: center;
+  background: var(--map-label);
+  border: 2px solid var(--background);
+  border-radius: 6px;
+  box-shadow: 0 3px 12px oklch(0 0 0 / 0.42);
+  color: var(--map-label-foreground);
+  display: flex;
+  font: 700 12px/1 var(--font-sans);
+  gap: 5px;
+  padding: 5px 7px;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.cc-bus-marker::before {
+  border-radius: 999px;
+  content: "";
+  height: 8px;
+  width: 8px;
+}
+
+.cc-bus-marker.is-seated::before { background: var(--success); }
+.cc-bus-marker.is-standing::before { background: var(--warning); }
+.cc-bus-marker.is-crowded::before { background: var(--destructive); }
+.cc-bus-marker span { font-size: 10px; opacity: 0.9; }
+.cc-bus-icon { letter-spacing: 0; }
+
+.leaflet-tooltip {
+  background: var(--map-label);
+  border-color: var(--background);
+  color: var(--map-label-foreground);
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 
 @utility bg-gradient-hero {

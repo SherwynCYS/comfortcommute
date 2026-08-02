@@ -1,68 +1,29 @@
-import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { RAIL_STATIONS } from "@/data/mrt-stations";
-
-const LINE_COLORS: Record<string, string> = {
-  NS: "#d42e12",
-  EW: "#009645",
-  NE: "#9900aa",
-  CC: "#fa9e0d",
-  DT: "#005ec4",
-  TE: "#9d5b25",
-  BP: "#718472",
-  SK: "#718472",
-  PG: "#718472",
-};
-
-const codeLine = (code: string) => code.match(/^[A-Z]+/)?.[0] ?? "";
-const codeNumber = (code: string) => Number(code.match(/\d+/)?.[0] ?? 0);
+import { useState } from "react";
+import { Maximize2, Minus, Plus, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function MrtMap() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(1);
+  const changeZoom = (amount: number) => setZoom((value) => Math.min(3, Math.max(1, value + amount)));
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const map = L.map(containerRef.current, { zoomControl: false }).setView([1.3521, 103.8198], 11);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      attribution: "&copy; OpenStreetMap &copy; CARTO",
-      maxZoom: 19,
-    }).addTo(map);
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    for (const [line, color] of Object.entries(LINE_COLORS)) {
-      const stations = RAIL_STATIONS.flatMap((station) =>
-        station.codes
-          .filter((code) => codeLine(code) === line)
-          .map((code) => ({ station, code }))
-      ).sort((a, b) => codeNumber(a.code) - codeNumber(b.code));
-      if (stations.length > 1) {
-        L.polyline(stations.map(({ station }) => [station.lat, station.lng] as L.LatLngTuple), {
-          color,
-          weight: 4,
-          opacity: 0.8,
-        }).addTo(map);
-      }
-    }
-
-    for (const station of RAIL_STATIONS) {
-      const primaryLine = codeLine(station.codes[0] ?? "");
-      const marker = L.circleMarker([station.lat, station.lng], {
-        radius: station.codes.length > 1 ? 6 : 4,
-        color: "#ffffff",
-        weight: 2,
-        fillColor: LINE_COLORS[primaryLine] ?? "#64748b",
-        fillOpacity: 1,
-      });
-      marker.bindPopup(`<strong>${station.name}</strong><br>${station.codes.join(" · ")}`);
-      marker.bindTooltip(station.name, { direction: "top" });
-      marker.addTo(map);
-    }
-
-    return () => {
-      map.remove();
-    };
-  }, []);
-
-  return <div ref={containerRef} className="h-full w-full" aria-label="Interactive Singapore MRT and LRT map" />;
+  return (
+    <div className="relative h-full w-full overflow-auto bg-card" aria-label="Official Singapore MRT and LRT system map">
+      <div className="flex min-h-full min-w-full items-center justify-center p-3">
+        <img
+          src="/assets/singapore-rail-map.png"
+          alt="Official Singapore MRT and LRT system map"
+          draggable={false}
+          className="max-w-none select-none transition-[width] duration-200"
+          style={{ width: `${zoom * 100}%` }}
+        />
+      </div>
+      <div className="sticky bottom-3 ml-auto mr-3 flex w-fit items-center gap-1 rounded-md border border-border bg-background/95 p-1 shadow-lift backdrop-blur">
+        <Button size="icon" variant="ghost" onClick={() => changeZoom(-0.5)} disabled={zoom <= 1} aria-label="Zoom out"><Minus /></Button>
+        <span className="w-10 text-center text-xs font-semibold">{Math.round(zoom * 100)}%</span>
+        <Button size="icon" variant="ghost" onClick={() => changeZoom(0.5)} disabled={zoom >= 3} aria-label="Zoom in"><Plus /></Button>
+        <Button size="icon" variant="ghost" onClick={() => setZoom(1)} aria-label="Reset map"><RotateCcw /></Button>
+        <Button size="icon" variant="ghost" onClick={() => document.fullscreenElement ? document.exitFullscreen() : document.querySelector('[aria-label="Official Singapore MRT and LRT system map"]')?.requestFullscreen()} aria-label="Toggle full screen"><Maximize2 /></Button>
+      </div>
+    </div>
+  );
 }
