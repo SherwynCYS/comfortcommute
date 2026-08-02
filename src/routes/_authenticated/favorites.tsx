@@ -32,7 +32,6 @@ import { InfoButton } from "@/components/ui/info-button";
 import { useI18n } from "@/lib/i18n";
 
 const LiveMap = lazy(() => import("@/components/map/live-map"));
-const MrtMap = lazy(() => import("@/components/map/mrt-map"));
 
 export const Route = createFileRoute("/_authenticated/favorites")({
   ssr: false,
@@ -54,6 +53,7 @@ export const Route = createFileRoute("/_authenticated/favorites")({
 });
 
 function FavoritesPage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const listRoutesFn = useServerFn(listFavoriteRoutes);
   const listStopsFn = useServerFn(listFavoriteStops);
