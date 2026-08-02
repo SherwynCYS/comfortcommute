@@ -391,6 +391,31 @@ function LivePage() {
           stopCode={activeStop}
           stopPosition={stopInfo ? { lat: stopInfo.lat, lng: stopInfo.lng } : position}
         />
+        </TabsContent>
+
+        <TabsContent value="mrt" className="space-y-3">
+          <div>
+            <div className="flex items-center gap-1">
+              <h2 className="font-display text-lg font-semibold">{t("railTitle")}</h2>
+              <InfoButton label="About the rail map">
+                This is the official LTA system map, so station order, interchanges and line
+                connections match the network diagram used across Singapore. Drag with one finger to
+                move around, pinch or use the + / − buttons to zoom, and tap the reset button to fit
+                the whole map again.
+              </InfoButton>
+            </div>
+            <p className="text-sm text-muted-foreground">{t("railSubtitle")}</p>
+          </div>
+          <div className="h-[62vh] min-h-96 overflow-hidden rounded-2xl border border-border/70 shadow-soft">
+            <ClientOnly fallback={<MapSkeleton />}>
+              <Suspense fallback={<MapSkeleton />}>
+                <MrtMap />
+              </Suspense>
+            </ClientOnly>
+          </div>
+        </TabsContent>
+        </Tabs>
+
 
         <p className="pb-2 text-center text-[11px] leading-relaxed text-muted-foreground">
           Bus positions and arrival times come from LTA DataMall and can be delayed or missing.
