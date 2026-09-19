@@ -170,6 +170,7 @@ function AuthPage() {
 
       <Card className="relative w-full max-w-md border-border/60 shadow-lift">
         <CardHeader className="text-center">
+          <h1 className="sr-only">Sign in or create a ComfortCommute account</h1>
           <CardTitle className="text-xl">Welcome aboard</CardTitle>
           <CardDescription>Sign in to plan smarter commutes across Singapore.</CardDescription>
         </CardHeader>

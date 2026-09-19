@@ -149,6 +149,7 @@ function ProfilePage() {
   return (
     <MobileShell>
       <div className="space-y-5 p-4">
+        <h1 className="sr-only">Your ComfortCommute profile and saved places</h1>
         <Card className="overflow-hidden border-0 bg-gradient-hero text-ink-foreground shadow-lift">
           <CardHeader className="flex-row items-center gap-4 space-y-0">
             <Avatar className="h-16 w-16 ring-2 ring-primary-glow/40">

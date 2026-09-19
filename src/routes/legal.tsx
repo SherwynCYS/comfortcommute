@@ -100,10 +100,12 @@ function LegalPage() {
             <Card key={section.title} className="border-border/70 shadow-soft">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-3 text-base">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  {section.title}
+                  <h2 className="flex items-center gap-3 text-base font-semibold">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    {section.title}
+                  </h2>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
