@@ -1,0 +1,1 @@
+ALTER TABLE public.favorite_routes DROP CONSTRAINT IF EXISTS favorite_routes_priority_check; ALTER TABLE public.favorite_routes ADD CONSTRAINT favorite_routes_priority_check CHECK (priority IN ('comfort', 'time', 'balanced', 'price'));
