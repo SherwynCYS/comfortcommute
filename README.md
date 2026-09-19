@@ -7,9 +7,3 @@ This project was built with [Lovable](https://lovable.dev).
 **Live app**: https://comfortcommute.lovable.app
 
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
