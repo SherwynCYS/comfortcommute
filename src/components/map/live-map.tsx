@@ -78,8 +78,8 @@ export default function LiveMap({ center, buses, stops, incidents = [], routeLin
       [center.lat, center.lng],
       16
     );
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      attribution: "&copy; OpenStreetMap &copy; CARTO",
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
       maxZoom: 19,
     }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
