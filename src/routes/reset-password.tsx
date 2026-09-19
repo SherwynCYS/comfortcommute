@@ -79,7 +79,7 @@ function ResetPasswordPage() {
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Reset your password</CardTitle>
+          <CardTitle><h1>Reset your password</h1></CardTitle>
           <CardDescription>Choose a new password to continue planning your commute.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
