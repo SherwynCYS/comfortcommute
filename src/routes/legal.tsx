@@ -19,7 +19,9 @@ export const Route = createFileRoute("/legal")({
           "ComfortCommute disclaimer, third-party data attribution, AI limitations, privacy notice and terms of use.",
       },
       { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: "https://comfortcommute.lovable.app/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://comfortcommute.lovable.app/og-image.png" },
     ],
   }),
 });

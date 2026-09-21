@@ -16,7 +16,9 @@ export const Route = createFileRoute("/reset-password")({
       { property: "og:title", content: "Reset password | ComfortCommute" },
       { property: "og:description", content: "Set a new password for your ComfortCommute account." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: "https://comfortcommute.lovable.app/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://comfortcommute.lovable.app/og-image.png" },
     ],
   }),
 });
