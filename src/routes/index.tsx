@@ -38,7 +38,9 @@ export const Route = createFileRoute("/")({
           "Live bus positions, arrival countdowns, AI route ranking, crowd signals and Waze-style commuter reports for Singapore.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://comfortcommute.lovable.app/og-image.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://comfortcommute.lovable.app/og-image.png" },
     ],
   }),
 });
