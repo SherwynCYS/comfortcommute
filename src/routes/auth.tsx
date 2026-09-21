@@ -28,7 +28,9 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "Sign in | ComfortCommute" },
       { property: "og:description", content: "Sign in to ComfortCommute to plan your public transport journeys." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: "https://comfortcommute.lovable.app/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://comfortcommute.lovable.app/og-image.png" },
     ],
   }),
 });
